@@ -46,6 +46,9 @@ CREATE TABLE IF NOT EXISTS users (
   is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+-- for center_lag and center_lat
+-- Distance without live maps. We can calculate km between the pickup zone centre and drop-off zone centre with a formula
+-- eg: Raffles Place → Tuas ≈ 24 km
 CREATE TABLE IF NOT EXISTS zones (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL UNIQUE,
