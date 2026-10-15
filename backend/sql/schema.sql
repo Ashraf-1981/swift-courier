@@ -79,6 +79,10 @@ CREATE TABLE IF NOT EXISTS deliveries (
   dropoff_contact_phone VARCHAR(20) NOT NULL,
   instructions VARCHAR(255),
   allow_doorstep BOOLEAN NOT NULL DEFAULT FALSE, -- No permission unless the customer allows
+  collect_back BOOLEAN NOT NULL DEFAULT FALSE,
+  collect_back_note VARCHAR(255) NULL,
+  collect_back_fee DECIMAL(8,2) NOT NULL DEFAULT 0,
+  collect_back_status ENUM('not_requested','pending','collected','not_collected') NOT NULL DEFAULT 'not_requested',
   weight_kg DECIMAL(6,2) NOT NULL,
   length_cm SMALLINT UNSIGNED NOT NULL,
   width_cm SMALLINT UNSIGNED NOT NULL,
@@ -125,7 +129,7 @@ CREATE TABLE IF NOT EXISTS courier_zones (
 CREATE TABLE IF NOT EXISTS proof_of_delivery (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   delivery_id INT UNSIGNED NOT NULL,
-  proof_type ENUM('photo','signature_digital','signature_paper','cod_collected') NOT NULL,
+  proof_type ENUM('photo','signature_digital','signature_paper','cod_collected','collect_back') NOT NULL,
   file_url VARCHAR(255) NULL,
   received_by VARCHAR(100) NULL,
   remarks VARCHAR(255),
