@@ -7,15 +7,28 @@
 //   process.exit();
 // })();
 
+
+// This test with the collection back the item
 const feeSer = require('./servicesLayer/feeSer');
 
 (async () => {
-  const peak = await feeSer.calculateTotalFee(2, 1, 2, 0, '2026-10-16T08:30');    // Friday 8:30am
-  const night = await feeSer.calculateTotalFee(2, 1, 2, 0, '2026-10-16T23:00');   // Friday 11pm
-  const sunday = await feeSer.calculateTotalFee(2, 1, 2, 0, '2026-10-18T08:30');  // Sunday 8:30am
+  const carNo = await feeSer.calculateTotalFee({
+    deliveryTypeId: 2, pickupZoneId: 1, dropoffZoneId: 2,
+    pickupTime: '2026-10-16T23:00', collectBack: false,
+  });
 
-  console.log('Friday 8:30am:', peak.surcharge_total, peak.total_fee);
-  console.log('Friday 11pm:  ', night.surcharge_total, night.total_fee);
-  console.log('Sunday 8:30am:', sunday.surcharge_total, sunday.total_fee);
+  const carYes = await feeSer.calculateTotalFee({
+    deliveryTypeId: 2, pickupZoneId: 1, dropoffZoneId: 2,
+    pickupTime: '2026-10-16T23:00', collectBack: true,
+  });
+
+  const fourCar = await feeSer.calculateTotalFee({
+    deliveryTypeId: 5, pickupZoneId: 1, dropoffZoneId: 2,
+    pickupTime: '2026-10-16T23:00', collectBack: true,
+  });
+
+  console.log('Car, no collect:    ', carNo.total_fee, carNo.collect_back_fee);
+  console.log('Car, collect:       ', carYes.total_fee, carYes.collect_back_fee);
+  console.log('4-Hour Car, collect:', fourCar.total_fee, fourCar.collect_back_fee);
   process.exit();
 })();

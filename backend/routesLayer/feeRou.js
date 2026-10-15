@@ -13,6 +13,7 @@ router.get('/', async (req, res) => {
     const dropoff = Number(req.query.dropoff);
     const stops = Number(req.query.stops || 0);
     const time = req.query.time || new Date(); // no time given → use now
+    const collect = req.query.collect === 'true'; // ?collect=true → true, anything else → false
 
     // input check: type, pickup and dropoff must be given
     if (!type || !pickup || !dropoff) {
@@ -24,7 +25,14 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        const fee = await feeSer.calculateTotalFee(type, pickup, dropoff, stops, time);
+        const fee = await feeSer.calculateTotalFee({  // ⬅ CHANGED: one object with names
+            deliveryTypeId: type,
+            pickupZoneId: pickup,
+            dropoffZoneId: dropoff,
+            extraStops: stops,
+            pickupTime: time,
+            collectBack: collect,
+        });
         res.json(fee);
     } catch (err) {
         // "Zone not found" or "Delivery type not found" → 404

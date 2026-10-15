@@ -106,34 +106,36 @@ async function calculateDistance(pickupZoneId, dropoffZoneId) {
  * Returns a breakdown so each part is saved in the deliveries table
  * Price snapshot: so changing rates later never changes an old delivery’s price
  */
-async function calculateTotalFee(deliveryTypeId, pickupZoneId, dropoffZoneId, extraStops = 0, pickupTime = new Date()) 
-  {
-    const type = await deliveryTypesDat.getDeliveryTypeById(deliveryTypeId);
+async function calculateTotalFee({deliveryTypeId, pickupZoneId, dropoffZoneId, extraStops = 0, pickupTime = new Date(), collectBack = false}) {
+  const type = await deliveryTypesDat.getDeliveryTypeById(deliveryTypeId);
 
-    if (!type || !type.is_active) {
-      throw new Error('Delivery type not found');
-    }
-
-    const distanceKm = await calculateDistance(pickupZoneId, dropoffZoneId);
-    const surchargeTotal = await calculateSurcharge(pickupZoneId, dropoffZoneId, pickupTime);
-
-    const baseFee = Number(type.base_fee);
-    const distanceFee = distanceKm * Number(type.per_km_rate);
-    const stopsFee = extraStops * Number(type.extra_stop_fee);
-
-    const totalFee = baseFee + distanceFee + stopsFee + surchargeTotal;
-
-    // round money to 2 decimals, e.g. 48.480000001 → 48.48
-    const round2 = (n) => Math.round(n * 100) / 100;
-
-    return {
-      distance_km: distanceKm,
-      base_fee: round2(baseFee),
-      distance_fee: round2(distanceFee),
-      stops_fee: round2(stopsFee),
-      surcharge_total: round2(surchargeTotal),
-      total_fee: round2(totalFee),
-    };
+  if (!type || !type.is_active) {
+    throw new Error('Delivery type not found');
   }
 
-  module.exports = { calculateSurcharge, calculateDistance, calculateTotalFee };
+  const distanceKm = await calculateDistance(pickupZoneId, dropoffZoneId);
+  const surchargeTotal = await calculateSurcharge(pickupZoneId, dropoffZoneId, pickupTime);
+
+  const baseFee = Number(type.base_fee);
+  const distanceFee = distanceKm * Number(type.per_km_rate);
+  const stopsFee = extraStops * Number(type.extra_stop_fee);
+  // Business rule: collect-back fee shown separately, only charged after the item is collected
+  const collectBackFee = collectBack ? Number(type.collect_back_fee) : 0;
+
+  const totalFee = baseFee + distanceFee + stopsFee + surchargeTotal;
+
+  // round money to 2 decimals, e.g. 48.480000001 → 48.48
+  const round2 = (n) => Math.round(n * 100) / 100;
+
+  return {
+    distance_km: distanceKm,
+    base_fee: round2(baseFee),
+    distance_fee: round2(distanceFee),
+    stops_fee: round2(stopsFee),
+    surcharge_total: round2(surchargeTotal),
+    total_fee: round2(totalFee),
+    collect_back_fee: round2(collectBackFee),
+  };
+}
+
+module.exports = { calculateSurcharge, calculateDistance, calculateTotalFee };
