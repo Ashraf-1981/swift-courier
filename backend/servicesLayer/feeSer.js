@@ -17,7 +17,7 @@ function zoneSurchargeTotal(zone) {
     + Number(zone.erp_surcharge);
 }
 
-// Two zones                              (2 trips)
+// Pickup + drop-off surcharges            (2 trips)
 async function calculateSurcharge(pickupZoneId, dropoffZoneId) {
   const pickup = await zonesDat.getZoneById(pickupZoneId);
   const dropoff = await zonesDat.getZoneById(dropoffZoneId);
@@ -30,7 +30,7 @@ async function calculateSurcharge(pickupZoneId, dropoffZoneId) {
 }
 
 /**
- * Formula: haversine formula
+ * Haversine formula - to get only distance(km)
  * replace a live maps API (no need to pay for Google Maps API calls)
  * Latitude and longitude are measured in degrees
  * 1 degree ≈ 111 km on Earth
