@@ -6,6 +6,8 @@ const router = express.Router();
 
 /**
  * Returns the price breakdown
+ * Returns the suggested vehicle (if the requested one is too small)
+ * Returns collect back fee if requested
  */
 router.get('/', async (req, res) => {
     const type = Number(req.query.type);
