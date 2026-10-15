@@ -5,6 +5,7 @@
 -- One delivery type (like Bike) is used by many deliveries.
 -- But one delivery has only one type
 
+-- One delivery has many proofs of delivery (photo, signature, COD collected)
 
 -- M:N
 -- (join table courier_zones)
@@ -13,7 +14,7 @@
 
 
 -- 1:1
--- One delivery has one proof of delivery
+-- apart from delivery details. One delivery has one payment row
 
 
 CREATE TABLE IF NOT EXISTS users (
@@ -76,6 +77,7 @@ CREATE TABLE IF NOT EXISTS deliveries (
   dropoff_contact_name VARCHAR(100) NOT NULL,
   dropoff_contact_phone VARCHAR(20) NOT NULL,
   instructions VARCHAR(255),
+  allow_doorstep BOOLEAN NOT NULL DEFAULT FALSE, -- No permission unless the customer allows
   weight_kg DECIMAL(6,2) NOT NULL,
   length_cm SMALLINT UNSIGNED NOT NULL,
   width_cm SMALLINT UNSIGNED NOT NULL,
@@ -88,8 +90,6 @@ CREATE TABLE IF NOT EXISTS deliveries (
   surcharge_total DECIMAL(8,2) NOT NULL,
   total_fee DECIMAL(8,2) NOT NULL,
   status ENUM('pending','assigned','picked_up','out_for_delivery','delivered','cancelled') NOT NULL DEFAULT 'pending',
-  payment_status ENUM('unpaid','paid') NOT NULL DEFAULT 'unpaid',
-  payment_method ENUM('online','cod') NOT NULL DEFAULT 'online',
   scheduled_pickup_at DATETIME NOT NULL,
   deadline_at DATETIME NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -122,13 +122,31 @@ CREATE TABLE IF NOT EXISTS courier_zones (
 );
 
 CREATE TABLE IF NOT EXISTS proof_of_delivery (
-  delivery_id INT UNSIGNED PRIMARY KEY,
-  received_by VARCHAR(100) NOT NULL,
-  received_at DATETIME NOT NULL,
-  photo_url VARCHAR(255) NULL,
-  cod_collected DECIMAL(8,2) NULL,
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  delivery_id INT UNSIGNED NOT NULL,
+  proof_type ENUM('photo','signature_digital','signature_paper','cod_collected') NOT NULL,
+  file_url VARCHAR(255) NULL,
+  received_by VARCHAR(100) NULL,
   remarks VARCHAR(255),
   recorded_by INT UNSIGNED NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (delivery_id) REFERENCES deliveries(id),
   FOREIGN KEY (recorded_by) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS delivery_payments (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  delivery_id INT UNSIGNED NOT NULL UNIQUE,
+  method ENUM('cod','paynow','paypal','credit_card') NOT NULL,
+  amount DECIMAL(8,2) NOT NULL,
+  status ENUM('unpaid','paid') NOT NULL DEFAULT 'unpaid',
+  paid_at DATETIME NULL,
+  collected_by INT UNSIGNED NULL,
+  return_fee DECIMAL(8,2) NOT NULL DEFAULT 0,
+  return_method ENUM('cash','paynow','paypal','credit_card') NULL,
+  return_status ENUM('not_needed','unpaid','paid') NOT NULL DEFAULT 'not_needed',
+  return_paid_at DATETIME NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (delivery_id) REFERENCES deliveries(id),
+  FOREIGN KEY (collected_by) REFERENCES users(id)
 );

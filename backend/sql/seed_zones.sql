@@ -8,4 +8,7 @@ VALUES
   ('Jurong Island', 1.266000, 103.699000, 5.00, 10.00, 0.00, 'Pass needed before entering'),
   ('Choa Chu Kang', 1.384000, 103.747000, 5.00, 0.00, 0.00, NULL),
   ('Tuas', 1.294000, 103.635000, 8.00, 0.00, 0.00, NULL),
-  ('Changi Cargo Complex', 1.364400, 103.991500, 5.00, 10.00, 0.00, 'Pass needed before entering');
+  ('Changi Cargo Complex', 1.364400, 103.991500, 5.00, 10.00, 0.00, 'Pass needed before entering'),
+  ('Woodlands', 1.436000, 103.786500, 3.00, 0.00, 0.00, NULL),
+  ('Hougang', 1.371200, 103.892900, 0.00, 0.00, 0.00, NULL),
+  ('Sentosa', 1.249400, 103.830300, 0.00, 5.00, 0.00, 'Entry gantry charge at Sentosa');
