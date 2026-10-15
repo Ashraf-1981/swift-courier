@@ -1,4 +1,5 @@
 const zonesDat = require('../dataLayer/zonesDat');
+const deliveryTypesDat = require('../dataLayer/deliveryTypesDat');
 
 /**
  * Business logic for calculating fees:
@@ -76,4 +77,39 @@ async function calculateDistance(pickupZoneId, dropoffZoneId) {
   return Math.round(km * 10) / 10;
 }
 
-module.exports = { calculateSurcharge, calculateDistance };
+/**
+ * Business rule: Total fee
+ * total = base fee + (km × per-km rate) + (extra stops × stop fee) + surcharge
+ * Returns a breakdown so each part is saved in the deliveries table
+ * Price snapshot: so changing rates later never changes an old delivery’s price
+ */
+async function calculateTotalFee(deliveryTypeId, pickupZoneId, dropoffZoneId, extraStops = 0) {
+  const type = await deliveryTypesDat.getDeliveryTypeById(deliveryTypeId);
+
+  if (!type || !type.is_active) {
+    throw new Error('Delivery type not found');
+  }
+
+  const distanceKm = await calculateDistance(pickupZoneId, dropoffZoneId);
+  const surchargeTotal = await calculateSurcharge(pickupZoneId, dropoffZoneId);
+
+  const baseFee = Number(type.base_fee);
+  const distanceFee = distanceKm * Number(type.per_km_rate);
+  const stopsFee = extraStops * Number(type.extra_stop_fee);
+
+  const totalFee = baseFee + distanceFee + stopsFee + surchargeTotal;
+
+  // round money to 2 decimals, e.g. 48.480000001 → 48.48
+  const round2 = (n) => Math.round(n * 100) / 100;
+
+  return {
+    distance_km: distanceKm,
+    base_fee: round2(baseFee),
+    distance_fee: round2(distanceFee),
+    stops_fee: round2(stopsFee),
+    surcharge_total: round2(surchargeTotal),
+    total_fee: round2(totalFee),
+  };
+}
+
+module.exports = { calculateSurcharge, calculateDistance, calculateTotalFee };
