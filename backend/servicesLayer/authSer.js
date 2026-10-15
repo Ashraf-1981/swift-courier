@@ -1,9 +1,5 @@
-
-// login	Check email + password, create the access and refresh tokens
-// refresh	Give a new access token using the refresh token
-// logout	Blacklist the refresh token
-
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const usersDat = require('../dataLayer/usersDat');
 
 /**
@@ -36,4 +32,34 @@ async function register({ name, email, phone, password }) {
     return usersDat.getUserById(id); // without password_hash
 }
 
-module.exports = { register };
+/**
+ * Business rules: login
+ * 1. Same error for wrong email or wrong password (don't tell hackers which one)
+ * 2. Access token: 30 min, refresh token: 7 days
+ * 3. Token only carries id and role, never the password
+ */
+async function login({ email, password }) {
+    const user = await usersDat.getUserByEmail(email);
+
+    if (!user) {
+        throw new Error('Invalid email or password');
+    }
+
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) {
+        throw new Error('Invalid email or password');
+    }
+
+    const payload = { id: user.id, role: user.role };
+
+    const accessToken = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: '30m' });
+    const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+
+    return {
+        accessToken,
+        refreshToken,
+        user: await usersDat.getUserById(user.id), // without password_hash
+    };
+}
+
+module.exports = { register, login };
