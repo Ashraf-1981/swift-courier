@@ -8,26 +8,31 @@ const router = express.Router();
  * Returns the price breakdown
  */
 router.get('/', async (req, res) => {
-  const type = Number(req.query.type);
-  const pickup = Number(req.query.pickup);
-  const dropoff = Number(req.query.dropoff);
-  const stops = Number(req.query.stops || 0);
+    const type = Number(req.query.type);
+    const pickup = Number(req.query.pickup);
+    const dropoff = Number(req.query.dropoff);
+    const stops = Number(req.query.stops || 0);
+    const time = req.query.time || new Date(); // no time given → use now
 
-  // input check: type, pickup and dropoff must be given
-  if (!type || !pickup || !dropoff) {
-    return res.status(400).json({ error: 'type, pickup and dropoff are required' });
-  }
-
-  try {
-    const fee = await feeSer.calculateTotalFee(type, pickup, dropoff, stops);
-    res.json(fee);
-  } catch (err) {
-    // "Zone not found" or "Delivery type not found" → 404
-    if (err.message.includes('not found')) {
-      return res.status(404).json({ error: err.message });
+    // input check: type, pickup and dropoff must be given
+    if (!type || !pickup || !dropoff) {
+        return res.status(400).json({ error: 'type, pickup and dropoff are required' });
     }
-    res.status(500).json({ error: 'Something went wrong' });
-  }
+    // input check: time must be a real date              
+    if (isNaN(new Date(time))) {
+        return res.status(400).json({ error: 'time must be a valid date, e.g. 2026-10-16T08:30' });
+    }
+
+    try {
+        const fee = await feeSer.calculateTotalFee(type, pickup, dropoff, stops, time);
+        res.json(fee);
+    } catch (err) {
+        // "Zone not found" or "Delivery type not found" → 404
+        if (err.message.includes('not found')) {
+            return res.status(404).json({ error: err.message });
+        }
+        res.status(500).json({ error: 'Something went wrong' });
+    }
 });
 
 module.exports = router;

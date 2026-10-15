@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS users (
   base_fee DECIMAL(8,2) NOT NULL,
   per_km_rate DECIMAL(6,2) NOT NULL,
   extra_stop_fee DECIMAL(6,2) NOT NULL,
+  collect_back_fee DECIMAL(6,2) NOT NULL DEFAULT 0,
   max_weight_kg DECIMAL(6,2) NOT NULL,
   max_length_cm SMALLINT UNSIGNED NOT NULL,
   max_width_cm SMALLINT UNSIGNED NOT NULL,
