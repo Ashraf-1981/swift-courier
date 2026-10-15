@@ -10,15 +10,38 @@ const deliveryTypesDat = require('../dataLayer/deliveryTypesDat');
  * Each zone has a centre point, so I calculate km from pickup zone to drop-off zone
  */
 
-// One zone
-function zoneSurchargeTotal(zone) {
-  return Number(zone.outskirt_surcharge)
-    + Number(zone.restricted_surcharge)
-    + Number(zone.erp_surcharge);
+/**
+ * Business rule: ERP only on weekday peak hours
+ * Mon–Fri, 7:30–9:30am and 5:30–8:
+ * we use (pickupTime) as the best guess to replace live GPS
+ */
+function isErpPeak(pickupTime) {
+  const time = new Date(pickupTime);
+  const day = time.getDay(); // 0 = Sunday, 6 = Saturday
+
+  if (day === 0 || day === 6) {
+    return false; // weekend: no ERP
+  }
+
+  const minutes = time.getHours() * 60 + time.getMinutes(); // 8:30am → 510(Minutes since midnight)
+
+  const morningPeak = minutes >= 7 * 60 + 30 && minutes < 9 * 60 + 30;
+  const eveningPeak = minutes >= 17 * 60 + 30 && minutes < 20 * 60;
+
+  return morningPeak || eveningPeak;
 }
 
-// Pickup + drop-off surcharges            (2 trips)
-async function calculateSurcharge(pickupZoneId, dropoffZoneId) {
+// One zone: outskirt + restricted always, ERP only at peak
+function zoneSurchargeTotal(zone, pickupTime) {
+  const erp = isErpPeak(pickupTime) ? Number(zone.erp_surcharge) : 0;
+
+  return Number(zone.outskirt_surcharge)
+    + Number(zone.restricted_surcharge)
+    + erp;
+}
+
+// Two zones: pickup surcharges + drop-off surcharges (rule A)
+async function calculateSurcharge(pickupZoneId, dropoffZoneId, pickupTime) {
   const pickup = await zonesDat.getZoneById(pickupZoneId);
   const dropoff = await zonesDat.getZoneById(dropoffZoneId);
 
@@ -26,7 +49,7 @@ async function calculateSurcharge(pickupZoneId, dropoffZoneId) {
     throw new Error('Zone not found');
   }
 
-  return zoneSurchargeTotal(pickup) + zoneSurchargeTotal(dropoff);
+  return zoneSurchargeTotal(pickup, pickupTime) + zoneSurchargeTotal(dropoff, pickupTime);
 }
 
 /**
@@ -83,33 +106,34 @@ async function calculateDistance(pickupZoneId, dropoffZoneId) {
  * Returns a breakdown so each part is saved in the deliveries table
  * Price snapshot: so changing rates later never changes an old delivery’s price
  */
-async function calculateTotalFee(deliveryTypeId, pickupZoneId, dropoffZoneId, extraStops = 0) {
-  const type = await deliveryTypesDat.getDeliveryTypeById(deliveryTypeId);
+async function calculateTotalFee(deliveryTypeId, pickupZoneId, dropoffZoneId, extraStops = 0, pickupTime = new Date()) 
+  {
+    const type = await deliveryTypesDat.getDeliveryTypeById(deliveryTypeId);
 
-  if (!type || !type.is_active) {
-    throw new Error('Delivery type not found');
+    if (!type || !type.is_active) {
+      throw new Error('Delivery type not found');
+    }
+
+    const distanceKm = await calculateDistance(pickupZoneId, dropoffZoneId);
+    const surchargeTotal = await calculateSurcharge(pickupZoneId, dropoffZoneId, pickupTime);
+
+    const baseFee = Number(type.base_fee);
+    const distanceFee = distanceKm * Number(type.per_km_rate);
+    const stopsFee = extraStops * Number(type.extra_stop_fee);
+
+    const totalFee = baseFee + distanceFee + stopsFee + surchargeTotal;
+
+    // round money to 2 decimals, e.g. 48.480000001 → 48.48
+    const round2 = (n) => Math.round(n * 100) / 100;
+
+    return {
+      distance_km: distanceKm,
+      base_fee: round2(baseFee),
+      distance_fee: round2(distanceFee),
+      stops_fee: round2(stopsFee),
+      surcharge_total: round2(surchargeTotal),
+      total_fee: round2(totalFee),
+    };
   }
 
-  const distanceKm = await calculateDistance(pickupZoneId, dropoffZoneId);
-  const surchargeTotal = await calculateSurcharge(pickupZoneId, dropoffZoneId);
-
-  const baseFee = Number(type.base_fee);
-  const distanceFee = distanceKm * Number(type.per_km_rate);
-  const stopsFee = extraStops * Number(type.extra_stop_fee);
-
-  const totalFee = baseFee + distanceFee + stopsFee + surchargeTotal;
-
-  // round money to 2 decimals, e.g. 48.480000001 → 48.48
-  const round2 = (n) => Math.round(n * 100) / 100;
-
-  return {
-    distance_km: distanceKm,
-    base_fee: round2(baseFee),
-    distance_fee: round2(distanceFee),
-    stops_fee: round2(stopsFee),
-    surcharge_total: round2(surchargeTotal),
-    total_fee: round2(totalFee),
-  };
-}
-
-module.exports = { calculateSurcharge, calculateDistance, calculateTotalFee };
+  module.exports = { calculateSurcharge, calculateDistance, calculateTotalFee };
