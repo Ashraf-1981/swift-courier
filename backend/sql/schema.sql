@@ -155,3 +155,10 @@ CREATE TABLE IF NOT EXISTS delivery_payments (
   FOREIGN KEY (delivery_id) REFERENCES deliveries(id),
   FOREIGN KEY (collected_by) REFERENCES users(id)
 );
+
+CREATE TABLE token_blacklist (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  token VARCHAR(500) NOT NULL UNIQUE,
+  expires_at DATETIME NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
