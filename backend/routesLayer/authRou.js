@@ -1,6 +1,6 @@
 const express = require('express');
 const authSer = require('../servicesLayer/authSer');
-const { verifyToken } = require('../middleware/authMid');
+const { verifyToken, requireRole } = require('../middleware/authMid');
 
 const router = express.Router();
 
@@ -81,6 +81,12 @@ router.post('/logout', async (req, res) => {
  */
 router.get('/me', verifyToken, (req, res) => {
   res.json(req.user);
+});
+
+// require Role
+// TEMPORARY: test the role guard, remove when real admin routes exist
+router.get('/admin-only', verifyToken, requireRole(['admin']), (req, res) => {
+  res.json({ message: 'Welcome, admin', user: req.user });
 });
 
 

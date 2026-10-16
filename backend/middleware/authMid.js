@@ -23,4 +23,19 @@ function verifyToken(req, res, next) {
   }
 }
 
-module.exports = { verifyToken };
+/**
+ * Business rules: requireRole
+ * 1. Runs after verifyToken (needs req.user)
+ * 2. Only the roles in the list may continue, e.g. requireRole(['admin'])
+ * 3. Logged in but wrong role → 403
+ */
+function requireRole(roles) {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ error: 'You are not allowed to do this' });
+    }
+    next();
+  };
+}
+
+module.exports = { verifyToken, requireRole };
