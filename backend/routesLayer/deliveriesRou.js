@@ -5,7 +5,7 @@ const { verifyToken, requireRole } = require('../middleware/authMid');
 const router = express.Router();
 
 // error messages that mean "bad form", not "server broke"
-const BAD_INPUT = ['required', 'Payment method', 'Pickup time', 'collect back', 'too big'];
+const BAD_INPUT = ['required', 'Payment method', 'Pickup time', 'collect back', 'too big', 'Maximum'];
 
 /**
  * POST /api/deliveries

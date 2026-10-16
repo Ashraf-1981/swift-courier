@@ -23,6 +23,8 @@ tryIt('2. no drop-off  ', { ...goodForm, dropoffAddress: '' });
 tryIt('3. paypal       ', { ...goodForm, paymentMethod: 'paypal' });
 tryIt('4. past time    ', { ...goodForm, scheduledPickupAt: '2026-10-01T10:00' });
 tryIt('5. not a date   ', { ...goodForm, scheduledPickupAt: 'tomorrow' });
+tryIt('5b. 6 stops     ', { ...goodForm, extraStops: 6 });
+tryIt('5c. 5 stops     ', { ...goodForm, extraStops: 5 });
 
 console.log('--- options ---');
 console.log('6. online + doorstep →', deliveriesSer.applyOptions({ ...goodForm, paymentMethod: 'paynow', allowDoorstep: true }));

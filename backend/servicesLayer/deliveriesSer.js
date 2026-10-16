@@ -19,6 +19,7 @@ const PAYMENT_METHODS = ['cod', 'paynow', 'credit_card'];
  * 1. All required fields must be filled
  * 2. Payment method must be cod, paynow or credit_card
  * 3. Pickup time must be a real date, and not in the past
+ * 4. Maximum 5 extra stops
  */
 function validateBooking(form) {
   for (const field of REQUIRED) {
@@ -29,6 +30,10 @@ function validateBooking(form) {
 
   if (!PAYMENT_METHODS.includes(form.paymentMethod)) {
     throw new Error('Payment method must be cod, paynow or credit_card');
+  }
+
+  if (Number(form.extraStops || 0) > 5) {
+    throw new Error('Maximum 5 extra stops');
   }
 
   const pickup = new Date(form.scheduledPickupAt);
