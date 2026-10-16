@@ -33,8 +33,25 @@ router.post('/login', async (req, res) => {
   try {
     const result = await authSer.login(req.body || {});
     res.json(result);
+    
   } catch (err) {
     // wrong email or password → 401
+    res.status(401).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/auth/refresh
+ * Body: { refreshToken }
+ */
+router.post('/refresh', async (req, res) => {
+  try {
+    const { refreshToken } = req.body || {};
+    const result = await authSer.refresh(refreshToken);
+    res.json(result);
+
+  } catch (err) {
+    // missing, fake, expired or logged-out token → 401
     res.status(401).json({ error: err.message });
   }
 });
