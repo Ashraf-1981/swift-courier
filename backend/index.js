@@ -3,12 +3,14 @@ const cors = require("cors");
 const pool = require("./db");
 const feeRou = require("./routesLayer/feeRou");
 const authRou = require("./routesLayer/authRou");
+const deliveriesRou = require("./routesLayer/deliveriesRou");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/api/fee", feeRou);
 app.use("/api/auth", authRou);
+app.use("/api/deliveries", deliveriesRou);
 
 
 app.get("/api/health", (req, res) => {
