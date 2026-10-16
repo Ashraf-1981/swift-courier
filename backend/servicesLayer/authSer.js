@@ -62,4 +62,30 @@ async function login({ email, password }) {
     };
 }
 
-module.exports = { register, login };
+/**
+ * Business rules: refresh
+ * 1. It must be signed with REFRESH_TOKEN_SECRET and not expired
+ * 2. Gives only a new access token (30 min), with the same id and role
+ */
+function refresh(refreshToken) {
+    if (!refreshToken) {
+        throw new Error('Please log in again');
+    }
+
+    let payload;
+    try {
+        payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    } catch (err) {
+        throw new Error('Session expired, please log in again');
+    }
+
+    const accessToken = jwt.sign(
+        { id: payload.id, role: payload.role },
+        process.env.TOKEN_SECRET,
+        { expiresIn: '30m' }
+    );
+
+    return { accessToken };
+}
+
+module.exports = { register, login, refresh };
