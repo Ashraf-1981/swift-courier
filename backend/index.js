@@ -5,6 +5,7 @@ const feeRou = require("./routesLayer/feeRou");
 const authRou = require("./routesLayer/authRou");
 const deliveriesRou = require("./routesLayer/deliveriesRou");
 const deliveryTypesRou = require("./routesLayer/deliveryTypesRou");
+const zonesRou = require("./routesLayer/zonesRou");
 
 const app = express();
 app.use(cors());
@@ -13,7 +14,7 @@ app.use("/api/fee", feeRou);
 app.use("/api/auth", authRou);
 app.use("/api/deliveries", deliveriesRou);
 app.use("/api/delivery-types", deliveryTypesRou);
-
+app.use("/api/zones", zonesRou);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", app: "Swift-Courier" });
