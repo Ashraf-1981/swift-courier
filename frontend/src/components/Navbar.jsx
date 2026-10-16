@@ -26,6 +26,7 @@ function Navbar() {
                 <Link to="/" className="nav-link">Home</Link>
                 {auth ? (
                     <>
+                        <Link to="/my-deliveries" className="nav-link">My deliveries</Link>
                         <span className="nav-link">Hi {auth.user.name}</span>
                         <button className="btn btn-outline-light btn-sm ms-2" onClick={handleLogout}>
                             Log out

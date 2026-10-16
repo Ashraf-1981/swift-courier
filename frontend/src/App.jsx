@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Book from './pages/Book';
+import MyDeliveries from './pages/MyDeliveries';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -13,8 +14,16 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/book" element={
+          <ProtectedRoute role="customer">
+            <Book />
+          </ProtectedRoute>
+        }
+        />
+        <Route
+          path="/my-deliveries"
+          element={
             <ProtectedRoute role="customer">
-              <Book />
+              <MyDeliveries />
             </ProtectedRoute>
           }
         />
@@ -23,4 +32,4 @@ function App() {
   );
 }
 
-export default App;
+  export default App;
