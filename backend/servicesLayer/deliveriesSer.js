@@ -1,6 +1,8 @@
 const feeSer = require('./feeSer');
 const vehicleSer = require('./vehicleSer');
 const deliveryTypesDat = require('../dataLayer/deliveryTypesDat');
+const deliveriesDat = require('../dataLayer/deliveriesDat');
+const deliveryPaymentsDat = require('../dataLayer/deliveryPaymentsDat');
 
 const REQUIRED = [
   'deliveryTypeId', 'pickupZoneId', 'dropoffZoneId',
@@ -123,4 +125,57 @@ async function makeDeadline(deliveryTypeId, scheduledPickupAt) {
   return new Date(pickup.getTime() + hoursInMs);
 }
 
-module.exports = { validateBooking, applyOptions, priceBooking, makeTrackingNo, makeDeadline };
+/**
+ * Create a delivery for the logged-in customer.
+ * Runs the 5 rules in order, then saves the delivery and its payment row.
+ */
+async function createDelivery(customerId, form) {
+  validateBooking(form);                                         // 1. check form
+  const options = applyOptions(form);                            // 2. doorstep + collect-back
+  const { vehicle, fee } = await priceBooking(form, options);    // 3. vehicle + price
+  const trackingNo = makeTrackingNo();                           // 4. tracking no
+  const deadline = await makeDeadline(vehicle.suggested_id, form.scheduledPickupAt); // 5. deadline
+
+  const deliveryId = await deliveriesDat.createDelivery({
+    tracking_no: trackingNo,
+    customer_id: customerId,
+    delivery_type_id: vehicle.suggested_id,
+    pickup_zone_id: Number(form.pickupZoneId),
+    dropoff_zone_id: Number(form.dropoffZoneId),
+    pickup_address: form.pickupAddress,
+    pickup_contact_name: form.pickupContactName,
+    pickup_contact_phone: form.pickupContactPhone,
+    dropoff_address: form.dropoffAddress,
+    dropoff_contact_name: form.dropoffContactName,
+    dropoff_contact_phone: form.dropoffContactPhone,
+    instructions: form.instructions || null,
+    allow_doorstep: options.allowDoorstep,
+    collect_back: options.collectBack,
+    collect_back_note: options.collectBackNote,
+    collect_back_fee: fee.collect_back_fee,
+    collect_back_status: options.collectBackStatus,
+    weight_kg: Number(form.weightKg),
+    length_cm: Number(form.lengthCm),
+    width_cm: Number(form.widthCm),
+    height_cm: Number(form.heightCm),
+    extra_stops: Number(form.extraStops || 0),
+    distance_km: fee.distance_km,
+    base_fee: fee.base_fee,
+    distance_fee: fee.distance_fee,
+    stops_fee: fee.stops_fee,
+    surcharge_total: fee.surcharge_total,
+    total_fee: fee.total_fee,
+    scheduled_pickup_at: new Date(form.scheduledPickupAt),
+    deadline_at: deadline,
+  });
+
+  await deliveryPaymentsDat.createPayment({
+    delivery_id: deliveryId,
+    method: form.paymentMethod,
+    amount: fee.total_fee, // collect-back fee NOT included, charged only after collection
+  });
+
+  return deliveriesDat.getDeliveryById(deliveryId);
+}
+
+module.exports = { validateBooking, applyOptions, priceBooking, makeTrackingNo, makeDeadline, createDelivery };
