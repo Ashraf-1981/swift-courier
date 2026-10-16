@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { API_URL } from '../api';
+import { useSetAtom } from 'jotai';
+import { useNavigate } from 'react-router-dom';
+import { authAtom } from '../atoms/authAtom';
 import axios from 'axios';
 
 function Login() {
@@ -8,6 +11,8 @@ function Login() {
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
+    const setAuth = useSetAtom(authAtom);
+    const navigate = useNavigate();
 
     async function handleSubmit(e) {
         e.preventDefault(); // stop the browser reloading the page
@@ -18,9 +23,10 @@ function Login() {
         try {
             const res = await axios.post(`${API_URL}/auth/login`, { email, password });
 
-            setMessage(`Hi ${res.data.user.name}, you are logged in`);
+            setAuth(res.data);   // save tokens + user in the atom
+            navigate('/');       // go to Home
         } catch (err) {
-            
+
             if (err.response) {
                 setError(err.response.data.error); // e.g. "Invalid email or password"
             } else {
