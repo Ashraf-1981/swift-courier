@@ -1,5 +1,6 @@
 const feeSer = require('./feeSer');
 const vehicleSer = require('./vehicleSer');
+const deliveryTypesDat = require('../dataLayer/deliveryTypesDat');
 
 const REQUIRED = [
   'deliveryTypeId', 'pickupZoneId', 'dropoffZoneId',
@@ -88,4 +89,38 @@ async function priceBooking(form, options) {
   return { vehicle, fee };
 }
 
-module.exports = { validateBooking, applyOptions, priceBooking };
+/**
+ * Business rules: tracking number
+ * 1. Format SC-YYYYMMDD-XXXXX: today's date (Singapore time) + 5 random letters/digits
+ * 2. Capital letters and digits only, easy to read out on the phone
+ * 3. tracking_no is UNIQUE in the database, so a rare duplicate is blocked there
+ */
+function makeTrackingNo() {
+  const date = new Date()
+    .toLocaleDateString('en-CA', { timeZone: 'Asia/Singapore' }) // '2026-10-16'
+    .replaceAll('-', '');                                         // '20261016'
+
+  const random = Math.random().toString(36).slice(2, 7).toUpperCase(); // e.g. 'K7Q2M'
+
+  return `SC-${date}-${random}`;
+}
+
+/**
+ * Business rules: deadline
+ * 1. Only types with delivery_window_hours (the 4-Hour types) get a deadline
+ * 2. Deadline = scheduled pickup time + that many hours
+ * 3. Uses the FINAL vehicle (after any upgrade), so a 4-Hour Car still gets 4 hours
+ */
+async function makeDeadline(deliveryTypeId, scheduledPickupAt) {
+  const type = await deliveryTypesDat.getDeliveryTypeById(deliveryTypeId);
+
+  if (!type.delivery_window_hours) {
+    return null; // normal type: no deadline
+  }
+
+  const pickup = new Date(scheduledPickupAt);
+  const hoursInMs = type.delivery_window_hours * 60 * 60 * 1000;
+  return new Date(pickup.getTime() + hoursInMs);
+}
+
+module.exports = { validateBooking, applyOptions, priceBooking, makeTrackingNo, makeDeadline };

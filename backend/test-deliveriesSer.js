@@ -30,24 +30,34 @@ console.log('7. COD + doorstep    →', deliveriesSer.applyOptions({ ...goodForm
 console.log('8. collect + note    →', deliveriesSer.applyOptions({ ...goodForm, collectBack: true, collectBackNote: 'Old printer' }));
 
 try {
-  deliveriesSer.applyOptions({ ...goodForm, collectBack: true });
+    deliveriesSer.applyOptions({ ...goodForm, collectBack: true });
 } catch (err) {
-  console.log('9. collect, no note  → Error:', err.message);
+    console.log('9. collect, no note  → Error:', err.message);
 }
 
 (async () => {
-  console.log('--- price ---');
+    console.log('--- price ---');
 
-  // 10. 5 kg on a Bike: fits, stays Bike
-  const r10 = await deliveriesSer.priceBooking(goodForm, deliveriesSer.applyOptions(goodForm));
-  console.log('10. vehicle →', r10.vehicle);
-  console.log('10. fee     →', r10.fee);
+    // 10. 5 kg on a Bike: fits, stays Bike
+    const r10 = await deliveriesSer.priceBooking(goodForm, deliveriesSer.applyOptions(goodForm));
+    console.log('10. vehicle →', r10.vehicle);
+    console.log('10. fee     →', r10.fee);
 
-  // 11. 15 kg on a Bike: too heavy, upgraded
-  const heavy = { ...goodForm, weightKg: 15 };
-  const r11 = await deliveriesSer.priceBooking(heavy, deliveriesSer.applyOptions(heavy));
-  console.log('11. vehicle →', r11.vehicle);
-  console.log('11. fee     →', r11.fee);
+    // 11. 15 kg on a Bike: too heavy, upgraded
+    const heavy = { ...goodForm, weightKg: 15 };
+    const r11 = await deliveriesSer.priceBooking(heavy, deliveriesSer.applyOptions(heavy));
+    console.log('11. vehicle →', r11.vehicle);
+    console.log('11. fee     →', r11.fee);
 
-  process.exit();
+    console.log('--- tracking ---');
+    console.log('12.', deliveriesSer.makeTrackingNo());
+    console.log('12.', deliveriesSer.makeTrackingNo());
+    console.log('12.', deliveriesSer.makeTrackingNo());
+
+    console.log('--- deadline (pickup 20 Oct, 10:00 am) ---');
+    for (const id of [1, 2, 3, 4, 5, 6]) {
+        console.log('13. type', id, '→', await deliveriesSer.makeDeadline(id, '2026-10-20T10:00'));
+    }
+
+    process.exit();
 })();
