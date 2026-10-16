@@ -4,6 +4,7 @@ const authSer = require('../servicesLayer/authSer');
 const router = express.Router();
 
 /**
+ * Authentication routes
  * POST /api/auth/register
  * Body: { name, email, phone, password }
  */
@@ -33,7 +34,7 @@ router.post('/login', async (req, res) => {
   try {
     const result = await authSer.login(req.body || {});
     res.json(result);
-    
+
   } catch (err) {
     // wrong email or password → 401
     res.status(401).json({ error: err.message });
@@ -56,4 +57,19 @@ router.post('/refresh', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/auth/logout
+ * Body: { refreshToken }
+ */
+router.post('/logout', async (req, res) => {
+  try {
+    const { refreshToken } = req.body || {};
+    const result = await authSer.logout(refreshToken);
+    res.json(result);
+    
+  } catch (err) {
+    // logout itself never fails, so this only happens if the database breaks
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
 module.exports = router;
