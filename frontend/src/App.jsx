@@ -1,10 +1,17 @@
+import { Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import Login from './pages/Login';
+
 function App() {
   return (
-    <div className="container-fluid px-5 py-5">
-      <h1 className="text-primary">Swift-Courier</h1>
-      <p className="lead">Fast deliveries across Singapore.</p>
-      <button className="btn btn-primary">Book a delivery</button>
-    </div>
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+      </Routes>
+    </>
   );
 }
 
