@@ -1,5 +1,6 @@
 const express = require('express');
 const authSer = require('../servicesLayer/authSer');
+const { verifyToken } = require('../middleware/authMid');
 
 const router = express.Router();
 
@@ -66,10 +67,21 @@ router.post('/logout', async (req, res) => {
     const { refreshToken } = req.body || {};
     const result = await authSer.logout(refreshToken);
     res.json(result);
-    
+
   } catch (err) {
     // logout itself never fails, so this only happens if the database breaks
     res.status(500).json({ error: 'Something went wrong' });
   }
 });
+
+/**
+ * GET /api/auth/me
+ * Header: Authorization: Bearer <accessToken>(arc)
+ * Returns who is logged in (from the token).
+ */
+router.get('/me', verifyToken, (req, res) => {
+  res.json(req.user);
+});
+
+
 module.exports = router;
