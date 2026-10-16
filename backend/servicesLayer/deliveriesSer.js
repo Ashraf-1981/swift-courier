@@ -192,4 +192,24 @@ async function getMyDeliveries(customerId) {
   return deliveriesDat.getDeliveriesByCustomer(customerId);
 }
 
-module.exports = { validateBooking, applyOptions, priceBooking, makeTrackingNo, makeDeadline, createDelivery, getMyDeliveries };
+/**
+ * Business rules: one delivery for the customer
+ * 1. Only her own; someone else's answers "not found" (don't reveal it exists)
+ * 2. Courier name shows once assigned
+ * 3. Courier phone shows only while out for delivery
+ */
+async function getMyDeliveryById(customerId, deliveryId) {
+  const d = await deliveriesDat.getDeliveryDetail(deliveryId);
+
+  if (!d || d.customer_id !== customerId) {
+    throw new Error('Delivery not found');
+  }
+
+  if (d.status !== 'out_for_delivery') {
+    d.courier_phone = null;
+  }
+
+  return d;
+}
+
+module.exports = { validateBooking, applyOptions, priceBooking, makeTrackingNo, makeDeadline, createDelivery, getMyDeliveries, getMyDeliveryById };

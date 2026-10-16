@@ -41,4 +41,20 @@ router.get('/', verifyToken, requireRole(['customer']), async (req, res) => {
     }
 });
 
+/**
+ * GET /api/deliveries/:id
+ * Header: Authorization: Bearer <accessToken>
+ * One of the logged-in customer's deliveries, with full details.
+ */
+router.get('/:id', verifyToken, requireRole(['customer']), async (req, res) => {
+    try {
+        res.json(await deliveriesSer.getMyDeliveryById(req.user.id, Number(req.params.id)));
+    } catch (err) {
+        if (err.message.includes('not found')) {
+            return res.status(404).json({ error: err.message });
+        }
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+});
+
 module.exports = router;
