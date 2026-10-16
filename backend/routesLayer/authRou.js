@@ -3,22 +3,38 @@ const authSer = require('../servicesLayer/authSer');
 
 const router = express.Router();
 
-// POST /api/auth/register  body: { name, email, phone, password }
+/**
+ * POST /api/auth/register
+ * Body: { name, email, phone, password }
+ */
 router.post('/register', async (req, res) => {
   try {
-    const user = await authSer.register(req.body);
-    res.status(201).json(user); 
+    const user = await authSer.register(req.body || {});
+    res.status(201).json(user);
+
   } catch (err) {
-    res.status(400).json({ error: err.message });
+
+    if (err.message.includes('already registered')) {
+      return res.status(409).json({ error: err.message });
+    }
+    // missing field or short password → 400
+    if (err.message.includes('required') || err.message.includes('at least')) {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(500).json({ error: 'Something went wrong' });
   }
 });
 
-// POST /api/auth/login  body: { email, password }
+/**
+ * POST /api/auth/login
+ * Body: { email, password }
+ */
 router.post('/login', async (req, res) => {
   try {
-    const result = await authSer.login(req.body);
+    const result = await authSer.login(req.body || {});
     res.json(result);
   } catch (err) {
+    // wrong email or password → 401
     res.status(401).json({ error: err.message });
   }
 });
