@@ -1,0 +1,25 @@
+const deliveriesSer = require('./servicesLayer/deliveriesSer');
+
+const goodForm = {
+    deliveryTypeId: 1, pickupZoneId: 1, dropoffZoneId: 2,
+    pickupAddress: '10 Test Road', pickupContactName: 'Siti', pickupContactPhone: '98887777',
+    dropoffAddress: '20 Test Street', dropoffContactName: 'Ahmad', dropoffContactPhone: '91110000',
+    weightKg: 5, lengthCm: 30, widthCm: 20, heightCm: 10,
+    scheduledPickupAt: '2026-10-20T10:00',
+    paymentMethod: 'cod',
+};
+
+function tryIt(label, form) {
+    try {
+        deliveriesSer.validateBooking(form);
+        console.log(label, '→ Form OK');
+    } catch (err) {
+        console.log(label, '→ Error:', err.message);
+    }
+}
+
+tryIt('1. good form    ', goodForm);
+tryIt('2. no drop-off  ', { ...goodForm, dropoffAddress: '' });
+tryIt('3. paypal       ', { ...goodForm, paymentMethod: 'paypal' });
+tryIt('4. past time    ', { ...goodForm, scheduledPickupAt: '2026-10-01T10:00' });
+tryIt('5. not a date   ', { ...goodForm, scheduledPickupAt: 'tomorrow' });
