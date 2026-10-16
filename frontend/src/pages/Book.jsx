@@ -29,6 +29,15 @@ function Book() {
     const [heightCm, setHeightCm] = useState('');
     const [extraStops, setExtraStops] = useState(0);
     const [scheduledPickupAt, setScheduledPickupAt] = useState('');
+    const [quote, setQuote] = useState(null);
+    const [quoteError, setQuoteError] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('');
+    const [allowDoorstep, setAllowDoorstep] = useState(false);
+    const [collectBack, setCollectBack] = useState(false);
+    const [collectBackNote, setCollectBackNote] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState('');
+    const [booked, setBooked] = useState(null);
 
     // runs once when the page opens: load vehicles and zones
     useEffect(() => {
@@ -49,6 +58,41 @@ function Book() {
         loadLists();
     }, []);
 
+    // get a new price whenever a price-related field changes
+    useEffect(() => {
+        const ready = deliveryTypeId && pickupZoneId && dropoffZoneId && weightKg && lengthCm && widthCm && heightCm;
+        if (!ready) {
+            setQuote(null);
+            setQuoteError('');
+            return;
+        }
+
+        async function getQuote() {
+            try {
+                const res = await axios.get(`${API_URL}/fee`, {
+                    params: {
+                        type: deliveryTypeId,
+                        pickup: pickupZoneId,
+                        dropoff: dropoffZoneId,
+                        weight: weightKg,
+                        length: lengthCm,
+                        width: widthCm,
+                        height: heightCm,
+                        stops: extraStops,
+                        collect: collectBack,
+                        time: scheduledPickupAt || undefined, // empty → backend uses "now"
+                    },
+                });
+                setQuote(res.data);
+                setQuoteError('');
+            } catch (err) {
+                setQuote(null);
+                setQuoteError(err.response ? err.response.data.error : 'Cannot get a price');
+            }
+        }
+        getQuote();
+    }, [deliveryTypeId, pickupZoneId, dropoffZoneId, weightKg, lengthCm, widthCm, heightCm, extraStops, scheduledPickupAt, collectBack]);
+
     // the zones users picked (to show their warning notes)
     const pickupZone = zones.find((z) => z.id === Number(pickupZoneId));
     const dropoffZone = zones.find((z) => z.id === Number(dropoffZoneId));
@@ -61,8 +105,49 @@ function Book() {
         .toISOString()
         .slice(0, 16);
 
+    // Business rule: COD blocks doorstep
+    function choosePayment(method) {
+        setPaymentMethod(method);
+        if (method === 'cod') setAllowDoorstep(false);
+    }
+
+    async function handleBook() {
+        setSubmitError('');
+        setSubmitting(true);
+        try {
+            const res = await axios.post(
+                `${API_URL}/deliveries`,
+                {
+                    deliveryTypeId, pickupZoneId, dropoffZoneId,
+                    pickupAddress, pickupContactName, pickupContactPhone,
+                    dropoffAddress, dropoffContactName, dropoffContactPhone,
+                    instructions, weightKg, lengthCm, widthCm, heightCm, extraStops,
+                    scheduledPickupAt, paymentMethod, allowDoorstep, collectBack, collectBackNote,
+                },
+                { headers: { Authorization: `Bearer ${auth.accessToken}` } }
+            );
+            setBooked(res.data);
+        } catch (err) {
+            setSubmitError(err.response ? err.response.data.error : 'Cannot reach the server');
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
     if (loading) return <div className="container-fluid px-4 py-5">Loading...</div>;
     if (error) return <div className="container-fluid px-4 py-5"><div className="alert alert-danger">{error}</div></div>;
+    // after booking: show the tracking number
+    if (booked) {
+        return (
+            <div className="container-fluid px-4 py-5" style={{ maxWidth: 600 }}>
+                <div className="alert alert-success">
+                    <h4 className="alert-heading">Booked!</h4>
+                    <p className="mb-1">Tracking number: <strong>{booked.tracking_no}</strong></p>
+                    <p className="mb-0">Total: ${booked.total_fee}</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container-fluid px-4 py-5" style={{ maxWidth: 900 }}>
@@ -189,6 +274,89 @@ function Book() {
                         value={scheduledPickupAt} onChange={(e) => setScheduledPickupAt(e.target.value)} />
                 </div>
             </div>
+
+            {/* 5. Price */}
+            <h5>5. Price</h5>
+            <div className="card mb-4">
+                <div className="card-body">
+                    {!quote && !quoteError && (
+                        <p className="text-muted mb-0">Fill in vehicle, areas and parcel size to see the price.</p>
+                    )}
+
+                    {quoteError && <div className="alert alert-danger mb-0">{quoteError}</div>}
+
+                    {quote && (
+                        <>
+                            {quote.vehicle.upgraded && (
+                                <div className="alert alert-warning">
+                                    Your parcel doesn't fit the vehicle you chose, so it's moved to{' '}
+                                    <strong>{quote.vehicle.suggested}</strong>.
+                                </div>
+                            )}
+                            <table className="table table-sm mb-0">
+                                <tbody>
+                                    <tr><td>Base fee ({quote.vehicle.suggested})</td><td className="text-end">${quote.fee.base_fee.toFixed(2)}</td></tr>
+                                    <tr><td>Distance ({quote.fee.distance_km} km)</td><td className="text-end">${quote.fee.distance_fee.toFixed(2)}</td></tr>
+                                    <tr><td>Extra stops</td><td className="text-end">${quote.fee.stops_fee.toFixed(2)}</td></tr>
+                                    <tr><td>Surcharges</td><td className="text-end">${quote.fee.surcharge_total.toFixed(2)}</td></tr>
+                                    {quote.fee.collect_back_fee > 0 && (
+                                        <tr className="text-muted">
+                                            <td>Collect-back (charged only after collection)</td>
+                                            <td className="text-end">${quote.fee.collect_back_fee.toFixed(2)}</td>
+                                        </tr>
+                                    )}
+                                    <tr className="fw-bold"><td>Total</td><td className="text-end">${quote.fee.total_fee.toFixed(2)}</td></tr>
+                                </tbody>
+                            </table>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            {/* 6. Payment and options */}
+            <h5>6. Payment and options</h5>
+            <div className="mb-3">
+                {[
+                    { value: 'cod', label: 'Cash on delivery (receiver pays the courier)' },
+                    { value: 'paynow', label: 'PayNow' },
+                    { value: 'credit_card', label: 'Credit card' },
+                ].map((m) => (
+                    <div className="form-check" key={m.value}>
+                        <input className="form-check-input" type="radio" id={m.value}
+                            checked={paymentMethod === m.value} onChange={() => choosePayment(m.value)} />
+                        <label className="form-check-label" htmlFor={m.value}>{m.label}</label>
+                    </div>
+                ))}
+            </div>
+
+            <div className="form-check mb-2">
+                <input className="form-check-input" type="checkbox" id="doorstep"
+                    checked={allowDoorstep} disabled={paymentMethod === 'cod'}
+                    onChange={(e) => setAllowDoorstep(e.target.checked)} />
+                <label className="form-check-label" htmlFor="doorstep">
+                    Put at doorstep if the receiver is not there
+                    {paymentMethod === 'cod' && <span className="text-muted"> (not for cash on delivery)</span>}
+                </label>
+            </div>
+
+            <div className="form-check mb-2">
+                <input className="form-check-input" type="checkbox" id="collect"
+                    checked={collectBack} onChange={(e) => setCollectBack(e.target.checked)} />
+                <label className="form-check-label" htmlFor="collect">
+                    Collect an item back from the receiver
+                </label>
+            </div>
+            {collectBack && (
+                <input className="form-control mb-3" placeholder="What to collect, e.g. old printer"
+                    value={collectBackNote} onChange={(e) => setCollectBackNote(e.target.value)} />
+            )}
+
+            {submitError && <div className="alert alert-danger mt-3">{submitError}</div>}
+
+            <button className="btn btn-primary btn-lg w-100 mt-3"
+                disabled={submitting || !quote} onClick={handleBook}>
+                {submitting ? 'Booking...' : 'Book now'}
+            </button>
         </div>
     );
 }
