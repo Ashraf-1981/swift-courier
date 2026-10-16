@@ -1,3 +1,6 @@
+const feeSer = require('./feeSer');
+const vehicleSer = require('./vehicleSer');
+
 const REQUIRED = [
   'deliveryTypeId', 'pickupZoneId', 'dropoffZoneId',
   'pickupAddress', 'pickupContactName', 'pickupContactPhone',
@@ -57,4 +60,32 @@ function applyOptions(form) {
   };
 }
 
-module.exports = { validateBooking, applyOptions };
+/**
+ * Business rules: price the booking
+ * 1. Vehicle first: the parcel's weight and size decide the vehicle (may upgrade, e.g. Bike → Car)
+ * 2. Then the fee for THAT vehicle, not the one Siti picked
+ * 3. The price is always worked out here on the server, never taken from the form
+ * 4. Collect-back fee only if the options rule allowed it
+ */
+async function priceBooking(form, options) {
+  const vehicle = await vehicleSer.suggestVehicle({
+    deliveryTypeId: Number(form.deliveryTypeId),
+    weightKg: Number(form.weightKg),
+    lengthCm: Number(form.lengthCm),
+    widthCm: Number(form.widthCm),
+    heightCm: Number(form.heightCm),
+  });
+
+  const fee = await feeSer.calculateTotalFee({
+    deliveryTypeId: vehicle.suggested_id,
+    pickupZoneId: Number(form.pickupZoneId),
+    dropoffZoneId: Number(form.dropoffZoneId),
+    extraStops: Number(form.extraStops || 0),
+    pickupTime: form.scheduledPickupAt,
+    collectBack: options.collectBack,
+  });
+
+  return { vehicle, fee };
+}
+
+module.exports = { validateBooking, applyOptions, priceBooking };
