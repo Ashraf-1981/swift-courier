@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const usersDat = require('../dataLayer/usersDat');
+const blacklistDat = require('../dataLayer/blacklistDat');
 
 /**
  * Business rules: register
@@ -65,9 +66,10 @@ async function login({ email, password }) {
 /**
  * Business rules: refresh
  * 1. It must be signed with REFRESH_TOKEN_SECRET and not expired
- * 2. Gives only a new access token (30 min), with the same id and role
+ * 2. A logged-out token (on the blacklist) is blocked
+ * 3. Gives only a new access token (30 min), with the same id and role
  */
-function refresh(refreshToken) {
+async function refresh(refreshToken) {
     if (!refreshToken) {
         throw new Error('Please log in again');
     }
@@ -79,6 +81,12 @@ function refresh(refreshToken) {
         throw new Error('Session expired, please log in again');
     }
 
+    const blocked = await blacklistDat.findToken(refreshToken);
+    if (blocked) {
+        throw new Error('Session expired, please log in again');
+    }
+
+    // If (!blocked)
     const accessToken = jwt.sign(
         { id: payload.id, role: payload.role },
         process.env.TOKEN_SECRET,
@@ -88,4 +96,29 @@ function refresh(refreshToken) {
     return { accessToken };
 }
 
-module.exports = { register, login, refresh };
+/**
+ * Business rules: logout
+ * 1. Fake or expired token: nothing to block, still "logged out"
+ * 2. Real token: save it on the blacklist until its own expiry date
+ * 3. Logging out twice doesn't save it twice
+ */
+async function logout(refreshToken) {
+    let payload;
+    try {
+        payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    } catch (err) {
+        return { message: 'Logged out' }; // token already useless
+    }
+
+    const alreadyBlocked = await blacklistDat.findToken(refreshToken);
+    if (!alreadyBlocked) {
+        await blacklistDat.addToken({
+            token: refreshToken,
+            expiresAt: new Date(payload.exp * 1000),
+        });
+    }
+
+    return { message: 'Logged out' };
+}
+
+module.exports = { register, login, refresh, logout };
