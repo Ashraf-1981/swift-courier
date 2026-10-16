@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { API_URL } from '../api';
+import api from '../apiClient';
 import { useAtomValue } from 'jotai';
 import { authAtom } from '../atoms/authAtom';
 
@@ -115,8 +116,8 @@ function Book() {
         setSubmitError('');
         setSubmitting(true);
         try {
-            const res = await axios.post(
-                `${API_URL}/deliveries`,
+            const res = await api.post(
+                '/deliveries',
                 {
                     deliveryTypeId, pickupZoneId, dropoffZoneId,
                     pickupAddress, pickupContactName, pickupContactPhone,
@@ -124,7 +125,6 @@ function Book() {
                     instructions, weightKg, lengthCm, widthCm, heightCm, extraStops,
                     scheduledPickupAt, paymentMethod, allowDoorstep, collectBack, collectBackNote,
                 },
-                { headers: { Authorization: `Bearer ${auth.accessToken}` } }
             );
             setBooked(res.data);
         } catch (err) {
