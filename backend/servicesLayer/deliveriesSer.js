@@ -34,4 +34,27 @@ function validateBooking(form) {
   }
 }
 
-module.exports = { validateBooking };
+/**
+ * Business rules: booking options
+ * 1. COD blocks doorstep: the receiver must be there to pay, so allow_doorstep is forced off
+ * 2. Collect-back needs a note saying what to collect
+ * 3. Collect-back starts as 'pending'; not requested → 'not_requested'
+ */
+function applyOptions(form) {
+  const isCod = form.paymentMethod === 'cod';
+  const allowDoorstep = form.allowDoorstep === true && !isCod;
+  const collectBack = form.collectBack === true;
+
+  if (collectBack && !form.collectBackNote) {
+    throw new Error('Please describe the item to collect back');
+  }
+
+  return {
+    allowDoorstep,
+    collectBack,
+    collectBackStatus: collectBack ? 'pending' : 'not_requested',
+    collectBackNote: collectBack ? form.collectBackNote : null,
+  };
+}
+
+module.exports = { validateBooking, applyOptions };

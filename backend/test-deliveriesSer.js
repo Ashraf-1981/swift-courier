@@ -9,17 +9,28 @@ const goodForm = {
     paymentMethod: 'cod',
 };
 
-function tryIt(label, form) {
-    try {
-        deliveriesSer.validateBooking(form);
-        console.log(label, '→ Form OK');
-    } catch (err) {
-        console.log(label, '→ Error:', err.message);
-    }
-}
+// function tryIt(label, form) {
+//     try {
+//         deliveriesSer.validateBooking(form);
+//         console.log(label, '→ Form OK');
+//     } catch (err) {
+//         console.log(label, '→ Error:', err.message);
+//     }
+// }
 
-tryIt('1. good form    ', goodForm);
-tryIt('2. no drop-off  ', { ...goodForm, dropoffAddress: '' });
-tryIt('3. paypal       ', { ...goodForm, paymentMethod: 'paypal' });
-tryIt('4. past time    ', { ...goodForm, scheduledPickupAt: '2026-10-01T10:00' });
-tryIt('5. not a date   ', { ...goodForm, scheduledPickupAt: 'tomorrow' });
+// tryIt('1. good form    ', goodForm);
+// tryIt('2. no drop-off  ', { ...goodForm, dropoffAddress: '' });
+// tryIt('3. paypal       ', { ...goodForm, paymentMethod: 'paypal' });
+// tryIt('4. past time    ', { ...goodForm, scheduledPickupAt: '2026-10-01T10:00' });
+// tryIt('5. not a date   ', { ...goodForm, scheduledPickupAt: 'tomorrow' });
+
+console.log('--- options ---');
+console.log('6. online + doorstep →', deliveriesSer.applyOptions({ ...goodForm, paymentMethod: 'paynow', allowDoorstep: true }));
+console.log('7. COD + doorstep    →', deliveriesSer.applyOptions({ ...goodForm, allowDoorstep: true }));
+console.log('8. collect + note    →', deliveriesSer.applyOptions({ ...goodForm, collectBack: true, collectBackNote: 'Old printer' }));
+
+try {
+  deliveriesSer.applyOptions({ ...goodForm, collectBack: true });
+} catch (err) {
+  console.log('9. collect, no note  → Error:', err.message);
+}
