@@ -183,4 +183,13 @@ async function createDelivery(customerId, form) {
   return deliveriesDat.getDeliveryById(deliveryId);
 }
 
-module.exports = { validateBooking, applyOptions, priceBooking, makeTrackingNo, makeDeadline, createDelivery };
+/**
+ * Business rules: my deliveries
+ * 1. A customer only sees her own deliveries (id from the token, never the URL)
+ * 2. Newest first
+ */
+async function getMyDeliveries(customerId) {
+  return deliveriesDat.getDeliveriesByCustomer(customerId);
+}
+
+module.exports = { validateBooking, applyOptions, priceBooking, makeTrackingNo, makeDeadline, createDelivery, getMyDeliveries };
