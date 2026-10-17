@@ -1,10 +1,33 @@
 import { useState } from 'react';
+import axios from 'axios';
+import { API_URL } from '../api';
 
 function Register() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    async function handleRegister() {
+        setError('');
+        setMessage('');
+        setLoading(true);
+        try {
+            await axios.post(`${API_URL}/auth/register`, { name, email, phone, password });
+            setMessage('Account created. You can log in now.');
+        } catch (err) {
+            if (err.response) {
+                setError(err.response.data.error); // e.g. "Email already registered"
+            } else {
+                setError('Cannot reach the server'); // backend not running
+            }
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <div className="container-fluid px-4 py-5">
@@ -33,7 +56,12 @@ function Register() {
                     value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
 
-            <button className="btn btn-primary">Sign up</button>
+            {error && <div className="alert alert-danger">{error}</div>}
+            {message && <div className="alert alert-success">{message}</div>}
+
+            <button className="btn btn-primary" onClick={handleRegister} disabled={loading}>
+                {loading ? 'Signing up...' : 'Sign up'}
+            </button>
         </div>
     );
 }
