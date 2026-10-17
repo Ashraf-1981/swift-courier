@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Book from './pages/Book';
 import MyDeliveries from './pages/MyDeliveries';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/book" element={
           <ProtectedRoute role="customer">
             <Book />
@@ -32,4 +34,4 @@ function App() {
   );
 }
 
-  export default App;
+export default App;
