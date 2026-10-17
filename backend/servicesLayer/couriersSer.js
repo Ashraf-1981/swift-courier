@@ -152,10 +152,10 @@ async function updateJobStatus(courierId, deliveryId, newStatus, reason) {
         throw new Error('Job was updated by someone else');
     }
 
-    // returned to sender: return fee = full trip fee
-    // (COD: sender pays only half, online: on top of what was paid)
+    // returned to sender: online pays full trip fee again, COD sender pays half
     if (newStatus === 'returned') {
-        await deliveryPaymentsDat.setReturnFee(deliveryId, job.total_fee);
+        const fee = job.payment_method === 'cod' ? job.total_fee / 2 : job.total_fee;
+        await deliveryPaymentsDat.setReturnFee(deliveryId, fee);
     }
 
     const isFourHour = FOUR_HOUR_TYPE_IDS.includes(job.delivery_type_id);
