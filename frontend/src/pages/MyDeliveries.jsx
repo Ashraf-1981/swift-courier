@@ -39,7 +39,7 @@ function MyDeliveries() {
       {deliveries.map((d) => {
         const status = STATUS[d.status];
         return (
-          <div className="card mb-3" key={d.id}>
+          <Link to={`/track-delivery/${d.id}`} className="card mb-3 text-decoration-none text-reset" key={d.id}>
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-start">
                 <h6 className="mb-1">{d.tracking_no}</h6>
@@ -51,7 +51,7 @@ function MyDeliveries() {
                 {d.payment_method === 'cod' ? ' - cash on delivery' : ` - ${d.payment_status}`}
               </p>
             </div>
-          </div>
+          </Link>
         );
       })}
     </div>

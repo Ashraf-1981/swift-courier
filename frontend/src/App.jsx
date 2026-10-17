@@ -6,6 +6,7 @@ import Register from './pages/Register';
 import Book from './pages/Book';
 import MyDeliveries from './pages/MyDeliveries';
 import ProtectedRoute from './components/ProtectedRoute';
+import TrackDelivery from './pages/TrackDelivery';
 
 function App() {
   return (
@@ -26,6 +27,14 @@ function App() {
           element={
             <ProtectedRoute role="customer">
               <MyDeliveries />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/track-delivery/:id"
+          element={
+            <ProtectedRoute role="customer">
+              <TrackDelivery />
             </ProtectedRoute>
           }
         />
