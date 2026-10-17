@@ -1,6 +1,7 @@
 const express = require('express');
 const deliveriesSer = require('../servicesLayer/deliveriesSer');
 const { verifyToken, requireRole } = require('../middleware/authMid');
+const paymentsSer = require('../servicesLayer/paymentsSer');
 
 const router = express.Router();
 
@@ -52,6 +53,25 @@ router.get('/:id', verifyToken, requireRole(['customer']), async (req, res) => {
     } catch (err) {
         if (err.message.includes('not found')) {
             return res.status(404).json({ error: err.message });
+        }
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+});
+
+/**
+ * POST /api/deliveries/:id/pay
+ * Header: Authorization: Bearer <accessToken>
+ * Simulated payment for an online-paid delivery.
+ */
+router.post('/:id/pay', verifyToken, requireRole(['customer']), async (req, res) => {
+    try {
+        res.json(await paymentsSer.payDelivery(req.user.id, Number(req.params.id)));
+    } catch (err) {
+        if (err.message.includes('not found')) {
+            return res.status(404).json({ error: err.message });
+        }
+        if (err.message.includes('Cash on delivery') || err.message.includes('already paid')) {
+            return res.status(400).json({ error: err.message });
         }
         res.status(500).json({ error: 'Something went wrong' });
     }

@@ -14,4 +14,14 @@ async function getPaymentByDeliveryId(deliveryId) {
   return rows[0]; // undefined if not found
 }
 
-module.exports = { createPayment, getPaymentByDeliveryId };
+// simulated payment: mark one delivery's payment as paid
+async function markPaid(deliveryId) {
+  const [result] = await pool.query(
+    `UPDATE delivery_payments
+     SET status = 'paid', paid_at = NOW()
+     WHERE delivery_id = ? AND status = 'unpaid'`,
+    [deliveryId]
+  );
+  return result.affectedRows; // 1 = updated, 0 = nothing changed
+}
+module.exports = { createPayment, getPaymentByDeliveryId, markPaid };
