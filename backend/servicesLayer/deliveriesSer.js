@@ -219,6 +219,8 @@ async function getMyDeliveryById(customerId, deliveryId) {
     d.courier_phone = null;
   }
 
+  // the timeline, oldest first (for the tracking page)
+  d.history = await deliveryStatusHistoryDat.getHistoryByDelivery(deliveryId);
   return d;
 }
 
