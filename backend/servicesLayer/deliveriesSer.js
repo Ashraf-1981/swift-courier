@@ -244,4 +244,7 @@ async function getMyDeliveryById(customerId, deliveryId) {
   return d;
 }
 
-module.exports = { validateBooking, applyOptions, priceBooking, makeTrackingNo, makeDeadline, createDelivery, getMyDeliveries, getMyDeliveryById };
+module.exports = {
+  validateBooking, applyOptions, priceBooking, makeTrackingNo, makeDeadline,
+  createDelivery, getMyDeliveries, getMyDeliveryById, FOUR_HOUR_TYPE_IDS
+};

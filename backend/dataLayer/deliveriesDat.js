@@ -54,4 +54,23 @@ async function getDeliveryDetail(id) {
   return rows[0];
 }
 
-module.exports = { createDelivery, getDeliveryById, getDeliveriesByCustomer, getDeliveryDetail };
+// every job no courier holds right now (waiting for pickup, or waiting at the warehouse)
+async function getOpenJobs() {
+  const [rows] = await pool.query(
+    `SELECT d.id, d.tracking_no, d.status, d.delivery_type_id,
+            d.pickup_zone_id, d.dropoff_zone_id, d.scheduled_pickup_at,
+            t.name AS vehicle,
+            pz.name AS pickup_zone, dz.name AS dropoff_zone,
+            p.method AS payment_method, p.status AS payment_status
+     FROM deliveries d
+     JOIN delivery_types t ON t.id = d.delivery_type_id
+     JOIN zones pz ON pz.id = d.pickup_zone_id
+     JOIN zones dz ON dz.id = d.dropoff_zone_id
+     LEFT JOIN delivery_payments p ON p.delivery_id = d.id
+     WHERE d.status IN ('pending', 'at_warehouse')
+     ORDER BY d.scheduled_pickup_at`
+  );
+  return rows;
+}
+
+module.exports = { createDelivery, getDeliveryById, getDeliveriesByCustomer, getDeliveryDetail, getOpenJobs };
