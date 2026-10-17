@@ -8,6 +8,8 @@ function TrackDelivery() {
     const [d, setD] = useState(null); // d = one delivery (from deliveriesSer)
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [paying, setPaying] = useState(false);
+    const [payError, setPayError] = useState('');
 
     useEffect(() => {
         async function load() {
@@ -26,6 +28,19 @@ function TrackDelivery() {
         }
         load();
     }, [id]);
+
+    async function handlePay() {
+        setPayError('');
+        setPaying(true);
+        try {
+            await api.post(`/deliveries/${id}/pay`);
+            setD({ ...d, payment_status: 'paid' }); // show "Paid" without reloading
+        } catch (err) {
+            setPayError(err.response ? err.response.data.error : 'Cannot reach the server');
+        } finally {
+            setPaying(false);
+        }
+    }
 
     if (loading) return <div className="container-fluid px-4 py-5">Loading...</div>;
 
@@ -66,12 +81,22 @@ function TrackDelivery() {
                     <p className="mb-1">Vehicle: {d.vehicle}</p>
                     <p className="mb-1">Pickup time: {formatTime(d.scheduled_pickup_at)}</p>
                     <p className="mb-1">Total: ${d.total_fee}</p>
-                    <p className="mb-0">
-                        Payment: {d.payment_method === 'cod' ? 'Cash on delivery' : d.payment_status}
-                    </p>
+                    {d.payment_method === 'cod' ? (
+                        <p className="mb-0">Payment: Cash on delivery (receiver pays the courier)</p>
+                    ) : d.payment_status === 'paid' ? (
+                        <p className="mb-0">Payment: <span className="badge bg-success">Paid</span></p>
+                    ) : (
+                        <>
+                            <p className="mb-2">Payment: <span className="badge bg-danger">Unpaid</span></p>
+                            {payError && <div className="alert alert-danger py-2">{payError}</div>}
+                            <button className="btn btn-primary" onClick={handlePay} disabled={paying}>
+                                {paying ? 'Paying...' : `Pay $${d.total_fee}`}
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
-            
+
             {/* Courier */}
             <div className="card mb-3">
                 <div className="card-body">
