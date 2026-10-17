@@ -24,4 +24,15 @@ async function markPaid(deliveryId) {
   );
   return result.affectedRows; // 1 = updated, 0 = nothing changed
 }
-module.exports = { createPayment, getPaymentByDeliveryId, markPaid };
+
+// returned to sender: the sender now owes a return fee
+async function setReturnFee(deliveryId, fee) {
+  const [result] = await pool.query(
+    `UPDATE delivery_payments
+     SET return_fee = ?, return_status = 'unpaid'
+     WHERE delivery_id = ?`,
+    [fee, deliveryId]
+  );
+  return result.affectedRows;
+}
+module.exports = { createPayment, getPaymentByDeliveryId, markPaid, setReturnFee };

@@ -2,24 +2,34 @@ const pool = require('../db');
 
 // add one row each time a delivery's status changes
 async function addStatus({ deliveryId, oldStatus, newStatus, changedBy, note }) {
-  const [result] = await pool.query(
-    `INSERT INTO delivery_status_history (delivery_id, old_status, new_status, changed_by, note)
+    const [result] = await pool.query(
+        `INSERT INTO delivery_status_history (delivery_id, old_status, new_status, changed_by, note)
      VALUES (?, ?, ?, ?, ?)`,
-    [deliveryId, oldStatus, newStatus, changedBy, note || null]
-  );
-  return result.insertId;
+        [deliveryId, oldStatus, newStatus, changedBy, note || null]
+    );
+    return result.insertId;
 }
 
 // the timeline for one delivery, oldest first
 async function getHistoryByDelivery(deliveryId) {
-  const [rows] = await pool.query(
-    `SELECT new_status, note, created_at
+    const [rows] = await pool.query(
+        `SELECT new_status, note, created_at
      FROM delivery_status_history
      WHERE delivery_id = ?
      ORDER BY created_at, id`,
-    [deliveryId]
-  );
-  return rows;
+        [deliveryId]
+    );
+    return rows;
 }
 
-module.exports = { addStatus, getHistoryByDelivery };
+// how many times this delivery has failed (from the audit trail)
+async function countFailed(deliveryId) {
+    const [rows] = await pool.query(
+        `SELECT COUNT(*) AS total FROM delivery_status_history
+     WHERE delivery_id = ? AND new_status = 'failed'`,
+        [deliveryId]
+    );
+    return rows[0].total;
+}
+
+module.exports = { addStatus, getHistoryByDelivery, countFailed };

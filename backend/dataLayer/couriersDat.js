@@ -23,7 +23,7 @@ async function countJobsInHand(courierId) {
     const [rows] = await pool.query(
         `SELECT
        SUM(status = 'assigned') AS not_picked_up,
-       SUM(status IN ('assigned', 'picked_up', 'out_for_delivery')) AS in_hand
+       SUM(status IN ('assigned', 'picked_up', 'out_for_delivery', 'failed')) AS in_hand
      FROM deliveries
      WHERE courier_id = ?`,
         [courierId]

@@ -50,14 +50,14 @@ router.post('/jobs/:id/accept', verifyToken, requireRole(['courier']), async (re
  */
 router.post('/jobs/:id/status', verifyToken, requireRole(['courier']), async (req, res) => {
     try {
-        const { status } = req.body || {};
-        res.json(await couriersSer.updateJobStatus(req.user.id, Number(req.params.id), status));
+        const { status, reason } = req.body || {};
+        res.json(await couriersSer.updateJobStatus(req.user.id, Number(req.params.id), status, reason));
     } catch (err) {
         console.error('Job status error:', err.message);
         if (err.message.includes('not found')) {
             return res.status(404).json({ error: err.message });
         }
-        if (err.message.includes('Cannot change')) {
+        if (err.message.includes('Cannot change') || err.message.includes('reason') || err.message.includes('Doorstep')) {
             return res.status(400).json({ error: err.message });
         }
         if (err.message.includes('someone else')) {

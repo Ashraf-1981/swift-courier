@@ -3,6 +3,8 @@ const deliveriesDat = require('../dataLayer/deliveriesDat');
 const { FOUR_HOUR_TYPE_IDS } = require('./deliveriesSer');
 const deliveryStatusHistoryDat = require('../dataLayer/deliveryStatusHistoryDat');
 const MAX_JOBS_IN_HAND = 8;
+const deliveryPaymentsDat = require('../dataLayer/deliveryPaymentsDat');
+const MAX_ATTEMPTS = 2; // normal jobs: 2 tries, then back to sender
 
 // business rule: online jobs must be paid before going out; COD can go unpaid
 function isPaymentReady(job) {
@@ -86,59 +88,89 @@ async function acceptJob(courierId, deliveryId) {
  * Normal: assigned → picked_up → at_warehouse, or out_for_delivery if drop-off zone is his
  * 4-Hour: assigned → out_for_delivery (straight, never the warehouse)
  */
-function nextStatuses(job, zones) {
-  const isFourHour = FOUR_HOUR_TYPE_IDS.includes(job.delivery_type_id);
+function nextStatuses(job, zones, failedCount = 0) {
+    const isFourHour = FOUR_HOUR_TYPE_IDS.includes(job.delivery_type_id);
 
-  if (job.status === 'assigned') {
-    return isFourHour ? ['out_for_delivery'] : ['picked_up'];
-  }
-  if (job.status === 'picked_up' && !isFourHour) {
-    const allowed = ['at_warehouse'];
-    if (zones.includes(job.dropoff_zone_id)) {
-      allowed.push('out_for_delivery'); // deliver directly, same shift
+    if (job.status === 'assigned') {
+        return isFourHour ? ['out_for_delivery'] : ['picked_up'];
     }
-    return allowed;
-  }
+    if (job.status === 'picked_up' && !isFourHour) {
+        const allowed = ['at_warehouse'];
+        if (zones.includes(job.dropoff_zone_id)) {
+            allowed.push('out_for_delivery'); // deliver directly, same shift
+        }
+        return allowed;
+    }
 
-  return []; 
+    if (job.status === 'out_for_delivery') {
+        return ['failed'];
+    }
+    if (job.status === 'failed') {
+        // 4-Hour, or 2nd failed try → back to sender; else → warehouse to redeliver
+        return isFourHour || failedCount >= MAX_ATTEMPTS ? ['returned'] : ['at_warehouse'];
+    }
+    return [];
 }
 
+
 const STATUS_NOTES = {
-  picked_up: 'Parcel picked up',
-  at_warehouse: 'Dropped at warehouse',
-  out_for_delivery: 'Out for delivery',
+    picked_up: 'Parcel picked up',
+    at_warehouse: 'Dropped at warehouse',
+    out_for_delivery: 'Out for delivery',
+    failed: 'Delivery failed',
+    returned: 'Returned to sender',
 };
 
-async function updateJobStatus(courierId, deliveryId, newStatus) {
-  const job = await deliveriesDat.getDeliveryDetail(deliveryId);
-  if (!job || job.courier_id !== courierId) {
-    throw new Error('Job not found');
-  }
+async function updateJobStatus(courierId, deliveryId, newStatus, reason) {
+    const job = await deliveriesDat.getDeliveryDetail(deliveryId);
+    if (!job || job.courier_id !== courierId) {
+        throw new Error('Job not found');
+    }
 
-  const zones = await couriersDat.getZoneIds(courierId);
-  const allowed = nextStatuses(job, zones);
-  if (!allowed.includes(newStatus)) {
-    throw new Error(`Cannot change from ${job.status} to ${newStatus}`);
-  }
+    const zones = await couriersDat.getZoneIds(courierId);
+    const failedCount = await deliveryStatusHistoryDat.countFailed(deliveryId);
+    const allowed = nextStatuses(job, zones, failedCount);
+    if (!allowed.includes(newStatus)) {
+        throw new Error(`Cannot change from ${job.status} to ${newStatus}`);
+    }
 
-  // at the warehouse, the item leaves his hand (staff hand it out later)
-  const newCourierId = newStatus === 'at_warehouse' ? null : courierId;
+    // business rules for a failed delivery
+    if (newStatus === 'failed') {
+        if (job.allow_doorstep) {
+            throw new Error('Doorstep is allowed: leave it at the door instead');
+        }
+        if (!reason) {
+            throw new Error('Please give a reason for the failed delivery');
+        }
+    }
 
-  const changed = await deliveriesDat.updateStatus(deliveryId, job.status, newStatus, newCourierId);
-  if (changed === 0) {
-    throw new Error('Job was updated by someone else');
-  }
+    // at the warehouse, the item leaves his hand (staff hand it out later)
+    const newCourierId = newStatus === 'at_warehouse' ? null : courierId;
 
-  const isFourHour = FOUR_HOUR_TYPE_IDS.includes(job.delivery_type_id);
-  await deliveryStatusHistoryDat.addStatus({
-    deliveryId,
-    oldStatus: job.status,
-    newStatus,
-    changedBy: courierId,
-    note: isFourHour && job.status === 'assigned' ? 'Picked up, on the way' : STATUS_NOTES[newStatus],
-  });
+    const changed = await deliveriesDat.updateStatus(deliveryId, job.status, newStatus, newCourierId);
+    if (changed === 0) {
+        throw new Error('Job was updated by someone else');
+    }
 
-  return { message: 'Status updated', deliveryId, status: newStatus };
+    // returned to sender: return fee = full trip fee
+    // (COD: sender pays only half, online: on top of what was paid)
+    if (newStatus === 'returned') {
+        await deliveryPaymentsDat.setReturnFee(deliveryId, job.total_fee);
+    }
+
+    const isFourHour = FOUR_HOUR_TYPE_IDS.includes(job.delivery_type_id);
+    await deliveryStatusHistoryDat.addStatus({
+        deliveryId,
+        oldStatus: job.status,
+        newStatus,
+        changedBy: courierId,
+        note: newStatus === 'failed' ? `Failed: ${reason}`
+            : newStatus === 'at_warehouse' && job.status === 'failed' ? 'Back at warehouse, redeliver next working day'
+                : isFourHour && job.status === 'assigned' ? 'Picked up, on the way'
+                    : STATUS_NOTES[newStatus],
+    });
+
+    return { message: 'Status updated', deliveryId, status: newStatus };
 }
 
 module.exports = { getAvailableJobs, acceptJob, nextStatuses, updateJobStatus };
