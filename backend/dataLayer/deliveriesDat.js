@@ -94,8 +94,21 @@ async function updateStatus(deliveryId, fromStatus, toStatus, courierId) {
   );
   return result.affectedRows;
 }
+// parcels waiting at the warehouse for a courier, oldest first
+async function getWarehouseParcels() {
+  const [rows] = await pool.query(
+    `SELECT d.id, d.tracking_no, d.dropoff_zone_id, d.updated_at,
+            t.name AS vehicle, dz.name AS dropoff_zone
+     FROM deliveries d
+     JOIN delivery_types t ON t.id = d.delivery_type_id
+     JOIN zones dz ON dz.id = d.dropoff_zone_id
+     WHERE d.status = 'at_warehouse'
+     ORDER BY d.updated_at`
+  );
+  return rows;
+}
 
 module.exports = {
   createDelivery, getDeliveryById, getDeliveriesByCustomer,
-  getDeliveryDetail, getOpenJobs, assignCourier, updateStatus
+  getDeliveryDetail, getOpenJobs, assignCourier, updateStatus, getWarehouseParcels
 };

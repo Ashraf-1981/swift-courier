@@ -38,4 +38,16 @@ function requireRole(roles) {
   };
 }
 
-module.exports = { verifyToken, requireRole };
+/**
+ * Business rules: requireAdminSession (EJS admin pages)
+ * 1. Admin must be logged in through /admin/login (session)
+ * 2. Not logged in → go to the login page
+ */
+function requireAdminSession(req, res, next) {
+  if (!req.session.admin) {
+    return res.redirect('/admin/login');
+  }
+  next();
+}
+
+module.exports = { verifyToken, requireRole, requireAdminSession };

@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const authSer = require('../servicesLayer/authSer');
+const adminSer = require('../servicesLayer/adminSer');
+const { requireAdminSession } = require('../middleware/authMid');
 
 // GET /admin → admin home page
-router.get('/', (req, res) => {
+router.get('/', requireAdminSession, (req, res) => {
     res.render('admin/home', { title: 'Admin', admin: req.session.admin });
 });
 
@@ -35,6 +37,12 @@ router.post('/login', async (req, res) => {
 // GET /admin/logout → clear the session
 router.get('/logout', (req, res) => {
     req.session.destroy(() => res.redirect('/admin/login'));
+});
+
+// GET /admin/warehouse → parcels waiting for a courier
+router.get('/warehouse', requireAdminSession, async (req, res) => {
+    const parcels = await adminSer.getWarehouseParcels();
+    res.render('admin/warehouse', { admin: req.session.admin, parcels });
 });
 
 module.exports = router;
