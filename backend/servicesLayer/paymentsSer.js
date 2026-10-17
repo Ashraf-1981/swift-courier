@@ -24,4 +24,33 @@ async function payDelivery(customerId, deliveryId) {
   return { message: 'Payment successful', deliveryId };
 }
 
-module.exports = { payDelivery };
+const RETURN_METHODS = ['cash', 'paynow', 'credit_card'];
+
+/**
+ * Business rules: sender pays the return fee (simulated)
+ * 1. Only her own delivery
+ * 2. Only after the parcel is back (status 'returned')
+ * 3. Any method she picks: cash, paynow or credit_card
+ * 4. Can't pay twice
+ */
+async function payReturnFee(customerId, deliveryId, method) {
+  const d = await deliveriesDat.getDeliveryDetail(deliveryId);
+
+  if (!d || d.customer_id !== customerId) {
+    throw new Error('Delivery not found');
+  }
+  if (d.status !== 'returned') {
+    throw new Error('Return fee can only be paid after the return is complete');
+  }
+  if (!RETURN_METHODS.includes(method)) {
+    throw new Error('Payment method must be cash, paynow or credit_card');
+  }
+
+  const changed = await deliveryPaymentsDat.markReturnPaid(deliveryId, method);
+  if (changed === 0) {
+    throw new Error('Return fee is already paid');
+  }
+  return { message: 'Return fee paid', deliveryId, method };
+}
+
+module.exports = { payDelivery, payReturnFee };

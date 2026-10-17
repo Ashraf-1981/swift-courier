@@ -78,4 +78,25 @@ router.post('/:id/pay', verifyToken, requireRole(['customer']), async (req, res)
     }
 });
 
+/**
+ * POST /api/deliveries/:id/pay-return
+ * Header: Authorization: Bearer <accessToken>
+ * Body: { "method": "cash" | "paynow" | "credit_card" }
+ * Sender pays the return fee after the parcel is back.
+ */
+router.post('/:id/pay-return', verifyToken, requireRole(['customer']), async (req, res) => {
+    try {
+        const { method } = req.body || {};
+        res.json(await paymentsSer.payReturnFee(req.user.id, Number(req.params.id), method));
+    } catch (err) {
+        if (err.message.includes('not found')) {
+            return res.status(404).json({ error: err.message });
+        }
+        if (err.message.includes('return') || err.message.includes('method') || err.message.includes('already paid')) {
+            return res.status(400).json({ error: err.message });
+        }
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+});
+
 module.exports = router;
