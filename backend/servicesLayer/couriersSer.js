@@ -73,10 +73,7 @@ async function acceptJob(courierId, deliveryId) {
         throw new Error(`You already have ${MAX_JOBS_IN_HAND} jobs in hand`);
     }
 
-    // pickup → assigned; from the warehouse → straight out for delivery
-    const newStatus = job.job_type === 'delivery' ? 'out_for_delivery' : 'assigned';
-
-    const changed = await deliveriesDat.assignCourier(deliveryId, courierId, job.status, newStatus);
+    const changed = await deliveriesDat.assignCourier(deliveryId, courierId, job.status);
     if (changed === 0) {
         throw new Error('Job already taken');
     }
@@ -84,12 +81,12 @@ async function acceptJob(courierId, deliveryId) {
     await deliveryStatusHistoryDat.addStatus({
         deliveryId,
         oldStatus: job.status,          // 'pending' or 'at_warehouse'
-        newStatus,
+        newStatus: 'assigned',
         changedBy: courierId,
         note: job.job_type === 'pickup' ? 'Courier accepted pickup' : 'Courier accepted delivery',
     });
 
-    return { message: 'Job accepted', deliveryId, jobType: job.job_type, status: newStatus };
+    return { message: 'Job accepted', deliveryId, jobType: job.job_type };
 }
 
 /**
