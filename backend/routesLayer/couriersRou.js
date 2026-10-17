@@ -36,6 +36,9 @@ router.post('/jobs/:id/accept', verifyToken, requireRole(['courier']), async (re
         if (err.message.includes('already taken')) {
             return res.status(409).json({ error: err.message });
         }
+        if (err.message.includes('current job') || err.message.includes('in hand')) {
+            return res.status(400).json({ error: err.message });
+        }
         res.status(500).json({ error: 'Something went wrong' });
     }
 });
