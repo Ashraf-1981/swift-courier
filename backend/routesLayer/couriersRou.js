@@ -43,4 +43,27 @@ router.post('/jobs/:id/accept', verifyToken, requireRole(['courier']), async (re
     }
 });
 
+/**
+ * POST /api/couriers/jobs/:id/status
+ * Header: Authorization: Bearer <accessToken>
+ * Body: { "status": "picked_up" | "at_warehouse" | "out_for_delivery" }
+ */
+router.post('/jobs/:id/status', verifyToken, requireRole(['courier']), async (req, res) => {
+    try {
+        const { status } = req.body || {};
+        res.json(await couriersSer.updateJobStatus(req.user.id, Number(req.params.id), status));
+    } catch (err) {
+        console.error('Job status error:', err.message);
+        if (err.message.includes('not found')) {
+            return res.status(404).json({ error: err.message });
+        }
+        if (err.message.includes('Cannot change')) {
+            return res.status(400).json({ error: err.message });
+        }
+        if (err.message.includes('someone else')) {
+            return res.status(409).json({ error: err.message });
+        }
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+});
 module.exports = router;

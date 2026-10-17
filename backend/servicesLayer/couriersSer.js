@@ -81,4 +81,64 @@ async function acceptJob(courierId, deliveryId) {
     return { message: 'Job accepted', deliveryId, jobType: job.job_type };
 }
 
-module.exports = { getAvailableJobs, acceptJob };
+/**
+ * Business rules: which status a courier may move a job to next
+ * Normal: assigned → picked_up → at_warehouse, or out_for_delivery if drop-off zone is his
+ * 4-Hour: assigned → out_for_delivery (straight, never the warehouse)
+ */
+function nextStatuses(job, zones) {
+  const isFourHour = FOUR_HOUR_TYPE_IDS.includes(job.delivery_type_id);
+
+  if (job.status === 'assigned') {
+    return isFourHour ? ['out_for_delivery'] : ['picked_up'];
+  }
+  if (job.status === 'picked_up' && !isFourHour) {
+    const allowed = ['at_warehouse'];
+    if (zones.includes(job.dropoff_zone_id)) {
+      allowed.push('out_for_delivery'); // deliver directly, same shift
+    }
+    return allowed;
+  }
+
+  return []; 
+}
+
+const STATUS_NOTES = {
+  picked_up: 'Parcel picked up',
+  at_warehouse: 'Dropped at warehouse',
+  out_for_delivery: 'Out for delivery',
+};
+
+async function updateJobStatus(courierId, deliveryId, newStatus) {
+  const job = await deliveriesDat.getDeliveryDetail(deliveryId);
+  if (!job || job.courier_id !== courierId) {
+    throw new Error('Job not found');
+  }
+
+  const zones = await couriersDat.getZoneIds(courierId);
+  const allowed = nextStatuses(job, zones);
+  if (!allowed.includes(newStatus)) {
+    throw new Error(`Cannot change from ${job.status} to ${newStatus}`);
+  }
+
+  // at the warehouse, the item leaves his hand (staff hand it out later)
+  const newCourierId = newStatus === 'at_warehouse' ? null : courierId;
+
+  const changed = await deliveriesDat.updateStatus(deliveryId, job.status, newStatus, newCourierId);
+  if (changed === 0) {
+    throw new Error('Job was updated by someone else');
+  }
+
+  const isFourHour = FOUR_HOUR_TYPE_IDS.includes(job.delivery_type_id);
+  await deliveryStatusHistoryDat.addStatus({
+    deliveryId,
+    oldStatus: job.status,
+    newStatus,
+    changedBy: courierId,
+    note: isFourHour && job.status === 'assigned' ? 'Picked up, on the way' : STATUS_NOTES[newStatus],
+  });
+
+  return { message: 'Status updated', deliveryId, status: newStatus };
+}
+
+module.exports = { getAvailableJobs, acceptJob, nextStatuses, updateJobStatus };

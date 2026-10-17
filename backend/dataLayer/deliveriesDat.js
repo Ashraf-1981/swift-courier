@@ -84,4 +84,18 @@ async function assignCourier(deliveryId, courierId, fromStatus) {
   return result.affectedRows; // 1 = he got it, 0 = someone else was faster
 }
 
-module.exports = { createDelivery, getDeliveryById, getDeliveriesByCustomer, getDeliveryDetail, getOpenJobs, assignCourier };
+// move a job to a new status, only if it's still in the status we checked
+async function updateStatus(deliveryId, fromStatus, toStatus, courierId) {
+  const [result] = await pool.query(
+    `UPDATE deliveries
+     SET status = ?, courier_id = ?
+     WHERE id = ? AND status = ?`,
+    [toStatus, courierId, deliveryId, fromStatus]
+  );
+  return result.affectedRows;
+}
+
+module.exports = {
+  createDelivery, getDeliveryById, getDeliveriesByCustomer,
+  getDeliveryDetail, getOpenJobs, assignCourier, updateStatus
+};
