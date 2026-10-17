@@ -3,6 +3,7 @@ const vehicleSer = require('./vehicleSer');
 const deliveryTypesDat = require('../dataLayer/deliveryTypesDat');
 const deliveriesDat = require('../dataLayer/deliveriesDat');
 const deliveryPaymentsDat = require('../dataLayer/deliveryPaymentsDat');
+const deliveryStatusHistoryDat = require('../dataLayer/deliveryStatusHistoryDat');
 
 const REQUIRED = [
   'deliveryTypeId', 'pickupZoneId', 'dropoffZoneId',
@@ -178,6 +179,15 @@ async function createDelivery(customerId, form) {
     delivery_id: deliveryId,
     method: form.paymentMethod,
     amount: fee.total_fee, // collect-back fee NOT included, charged only after collection
+  });
+
+  // audit trail: booking is the first status
+  await deliveryStatusHistoryDat.addStatus({
+    deliveryId,
+    oldStatus: null,
+    newStatus: 'pending',
+    changedBy: customerId,
+    note: 'Booked by customer',
   });
 
   return deliveriesDat.getDeliveryById(deliveryId);
