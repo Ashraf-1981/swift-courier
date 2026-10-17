@@ -40,7 +40,13 @@ async function getAvailableJobs(courierId) {
             && zones.includes(j.pickup_zone_id))
         .map((j) => ({ ...j, job_type: 'pickup' }));
 
-    return pickups; // AM & PM deliveries are handed out by warehouse staff (admin)
+    // parcels at the warehouse (sorted by staff) going to his zones
+    const deliveries = jobs
+        .filter((j) => j.status === 'at_warehouse'
+            && zones.includes(j.dropoff_zone_id))
+        .map((j) => ({ ...j, job_type: 'delivery' }));
+
+    return [...pickups, ...deliveries];
 }
 
 /**
