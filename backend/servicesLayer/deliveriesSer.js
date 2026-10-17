@@ -14,6 +14,11 @@ const REQUIRED = [
 ];
 
 const PAYMENT_METHODS = ['cod', 'paynow', 'credit_card'];
+// working hours (minutes since midnight)
+const OPEN_MIN = 8 * 60 + 30;        // 08:30
+const CLOSE_MIN = 17 * 60;           // 17:00
+const FOUR_HOUR_CLOSE_MIN = 13 * 60; // 13:00, so 4 hours ends by 17:00
+const FOUR_HOUR_TYPE_IDS = [4, 5, 6]; // 4-Hour Bike, Car, Van
 
 /**
  * Business rules: check the booking form
@@ -43,6 +48,21 @@ function validateBooking(form) {
   }
   if (pickup < new Date()) {
     throw new Error('Pickup time cannot be in the past');
+  }
+  // business rule: working hours, weekdays only
+  const day = pickup.getDay(); // 0 = Sunday, 6 = Saturday
+  if (day === 0 || day === 6) {
+    throw new Error('We only pick up on weekdays');
+  }
+
+  const minutes = pickup.getHours() * 60 + pickup.getMinutes();
+  if (minutes < OPEN_MIN || minutes > CLOSE_MIN) {
+    throw new Error('Pickup must be between 8:30am and 5pm');
+  }
+
+  // business rule: 4-Hour must finish by 5pm (no overtime)
+  if (FOUR_HOUR_TYPE_IDS.includes(Number(form.deliveryTypeId)) && minutes > FOUR_HOUR_CLOSE_MIN) {
+    throw new Error('4-Hour pickups close at 1pm');
   }
 }
 
