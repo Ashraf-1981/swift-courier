@@ -4,6 +4,7 @@ const pool = require("./db");
 const feeRou = require("./routesLayer/feeRou");
 const authRou = require("./routesLayer/authRou");
 const deliveriesRou = require("./routesLayer/deliveriesRou");
+const couriersRou = require('./routesLayer/couriersRou');
 const deliveryTypesRou = require("./routesLayer/deliveryTypesRou");
 const zonesRou = require("./routesLayer/zonesRou");
 
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use("/api/fee", feeRou);
 app.use("/api/auth", authRou);
 app.use("/api/deliveries", deliveriesRou);
+app.use("/api/couriers", couriersRou);
 app.use("/api/delivery-types", deliveryTypesRou);
 app.use("/api/zones", zonesRou);
 
