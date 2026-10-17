@@ -9,6 +9,7 @@ const deliveryTypesRou = require("./routesLayer/deliveryTypesRou");
 const zonesRou = require("./routesLayer/zonesRou");
 const path = require("path");
 const adminRou = require("./routesLayer/adminRou");
+const session = require("express-session");
 
 const app = express();
 app.use(cors());
@@ -16,6 +17,13 @@ app.use(express.json());
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true })); // read HTML form data
+// admin login is kept in a session cookie
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { httpOnly: true, sameSite: "lax", maxAge: 2 * 60 * 60 * 1000 }, // 2 hours
+}));
 app.use("/api/fee", feeRou);
 app.use("/api/auth", authRou);
 app.use("/api/deliveries", deliveriesRou);
