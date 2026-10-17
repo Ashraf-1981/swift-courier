@@ -1,6 +1,7 @@
 const couriersDat = require('../dataLayer/couriersDat');
 const deliveriesDat = require('../dataLayer/deliveriesDat');
 const { FOUR_HOUR_TYPE_IDS } = require('./deliveriesSer');
+const deliveryStatusHistoryDat = require('../dataLayer/deliveryStatusHistoryDat');
 
 // business rule: online jobs must be paid before going out; COD can go unpaid
 function isPaymentReady(job) {
@@ -44,4 +45,34 @@ async function getAvailableJobs(courierId) {
   return [...pickups, ...handovers];
 }
 
-module.exports = { getAvailableJobs };
+/**
+ * Business rules: courier accepts a job
+ * 1. Only a job he is allowed to see (same rules as the jobs list)
+ * 2. If the status changed meanwhile, it's taken
+ * 3. Every change writes a history row
+ */
+async function acceptJob(courierId, deliveryId) {
+  const jobs = await getAvailableJobs(courierId);
+  const job = jobs.find((j) => j.id === deliveryId);
+
+  if (!job) {
+    throw new Error('Job not available');
+  }
+
+  const changed = await deliveriesDat.assignCourier(deliveryId, courierId, job.status);
+  if (changed === 0) {
+    throw new Error('Job already taken');
+  }
+
+  await deliveryStatusHistoryDat.addStatus({
+    deliveryId,
+    oldStatus: job.status,          // 'pending' or 'at_warehouse'
+    newStatus: 'assigned',
+    changedBy: courierId,
+    note: job.job_type === 'pickup' ? 'Courier accepted pickup' : 'Courier accepted delivery',
+  });
+
+  return { message: 'Job accepted', deliveryId, jobType: job.job_type };
+}
+
+module.exports = { getAvailableJobs, acceptJob };

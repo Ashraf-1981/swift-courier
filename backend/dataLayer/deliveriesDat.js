@@ -73,4 +73,15 @@ async function getOpenJobs() {
   return rows;
 }
 
-module.exports = { createDelivery, getDeliveryById, getDeliveriesByCustomer, getDeliveryDetail, getOpenJobs };
+// give a job to a courier, only if it's still in the status he saw
+async function assignCourier(deliveryId, courierId, fromStatus) {
+  const [result] = await pool.query(
+    `UPDATE deliveries
+     SET courier_id = ?, status = 'assigned'
+     WHERE id = ? AND status = ?`,
+    [courierId, deliveryId, fromStatus]
+  );
+  return result.affectedRows; // 1 = he got it, 0 = someone else was faster
+}
+
+module.exports = { createDelivery, getDeliveryById, getDeliveriesByCustomer, getDeliveryDetail, getOpenJobs, assignCourier };
