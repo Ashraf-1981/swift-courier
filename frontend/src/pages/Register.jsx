@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { API_URL } from '../api';
+import { useNavigate } from 'react-router-dom';
 
 function Register() {
     const [name, setName] = useState('');
@@ -10,6 +11,7 @@ function Register() {
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     async function handleRegister() {
         setError('');
@@ -17,7 +19,7 @@ function Register() {
         setLoading(true);
         try {
             await axios.post(`${API_URL}/auth/register`, { name, email, phone, password });
-            setMessage('Account created. You can log in now.');
+            navigate('/login', { state: { message: 'Account created. Please log in.' } });
         } catch (err) {
             if (err.response) {
                 setError(err.response.data.error); // e.g. "Email already registered"

@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { API_URL } from '../api';
 import { useSetAtom } from 'jotai';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { authAtom } from '../atoms/authAtom';
 import axios from 'axios';
 
 function Login() {
+    const location = useLocation(); // reads the note sent by navigate()
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState(location.state?.message || '');
     const [loading, setLoading] = useState(false);
     const setAuth = useSetAtom(authAtom);
     const navigate = useNavigate();
