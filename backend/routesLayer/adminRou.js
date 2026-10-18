@@ -42,7 +42,29 @@ router.get('/logout', (req, res) => {
 // GET /admin/warehouse → parcels waiting for a courier
 router.get('/warehouse', requireAdminSession, async (req, res) => {
     const parcels = await adminSer.getWarehouseParcels();
-    res.render('admin/warehouse', { admin: req.session.admin, parcels });
-});
+    res.render('admin/warehouse', {
+        admin: req.session.admin,
+        parcels,
+        msg: req.query.msg,
+        error: req.query.error,
+    });
+    });
+    /**
+     * POST /admin/warehouse/:id/assign
+     * Business rules:
+     * 1. Admin only (session)
+     * 2. Rules are checked in adminSer.assignParcel
+     * 3. Go back to the warehouse list with a message
+     */
+    router.post('/warehouse/:id/assign', requireAdminSession, async (req, res) => {
+        try {
+            const deliveryId = Number(req.params.id);
+            const courierId = Number(req.body.courierId);
+            await adminSer.assignParcel(req.session.admin.id, deliveryId, courierId);
+            res.redirect('/admin/warehouse?msg=' + encodeURIComponent('Parcel handed out'));
+        } catch (err) {
+            res.redirect('/admin/warehouse?error=' + encodeURIComponent(err.message));
+        }
+    });
 
-module.exports = router;
+    module.exports = router;

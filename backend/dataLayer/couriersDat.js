@@ -34,4 +34,16 @@ async function countJobsInHand(courierId) {
     };
 }
 
-module.exports = { getCourierById, getZoneIds, countJobsInHand };
+// normal couriers who cover this zone (for warehouse hand-out)
+async function getCouriersForZone(zoneId) {
+    const [rows] = await pool.query(
+        `SELECT u.id, u.name
+         FROM users u
+         JOIN courier_zones cz ON cz.courier_id = u.id
+         WHERE cz.zone_id = ? AND u.role = 'courier' AND u.is_express = 0
+         ORDER BY u.name`,
+        [zoneId]
+    );
+    return rows;
+}
+module.exports = { getCourierById, getZoneIds, countJobsInHand, getCouriersForZone };

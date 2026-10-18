@@ -2,7 +2,6 @@ const couriersDat = require('../dataLayer/couriersDat');
 const deliveriesDat = require('../dataLayer/deliveriesDat');
 const { FOUR_HOUR_TYPE_IDS } = require('./deliveriesSer');
 const deliveryStatusHistoryDat = require('../dataLayer/deliveryStatusHistoryDat');
-const MAX_JOBS_IN_HAND = 8;
 const deliveryPaymentsDat = require('../dataLayer/deliveryPaymentsDat');
 const MAX_ATTEMPTS = 2; // normal jobs: 2 tries, then back to sender
 
@@ -57,16 +56,11 @@ async function acceptJob(courierId, deliveryId) {
         throw new Error('Job not available');
     }
 
-    // rule 1: pick up the current job before taking another
-    // rule 2: max jobs in hand
+    // rule: pick up the current job before taking another (no limit on drop-offs)
     const hand = await couriersDat.countJobsInHand(courierId);
     if (hand.notPickedUp > 0) {
         throw new Error('Pick up your current job first');
     }
-    if (hand.inHand >= MAX_JOBS_IN_HAND) {
-        throw new Error(`You already have ${MAX_JOBS_IN_HAND} jobs in hand`);
-    }
-
     const changed = await deliveriesDat.assignCourier(deliveryId, courierId, job.status);
     if (changed === 0) {
         throw new Error('Job already taken');
