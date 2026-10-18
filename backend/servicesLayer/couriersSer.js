@@ -4,6 +4,8 @@ const { FOUR_HOUR_TYPE_IDS } = require('./deliveriesSer');
 const deliveryStatusHistoryDat = require('../dataLayer/deliveryStatusHistoryDat');
 const deliveryPaymentsDat = require('../dataLayer/deliveryPaymentsDat');
 const MAX_ATTEMPTS = 2; // normal jobs: 2 tries, then back to sender
+const proofOfDeliveryDat = require('../dataLayer/proofOfDeliveryDat');
+const fileSer = require('./fileSer');
 
 // business rule: online jobs must be paid before going out; COD can go unpaid
 function isPaymentReady(job) {
@@ -167,4 +169,47 @@ async function updateJobStatus(courierId, deliveryId, newStatus, reason) {
     return { message: 'Status updated', deliveryId, status: newStatus };
 }
 
-module.exports = { getAvailableJobs, acceptJob, nextStatuses, updateJobStatus };
+/**
+ * Business rules: courier marks a job delivered
+ * 1. Only his own job, only from out_for_delivery
+ * 2. Doorstep allowed → photo only; else receiver's signature
+ * 3. Save image, then status, proof, COD cash, history
+ */
+async function markDelivered(courierId, deliveryId, { proofType, image }) {
+    const job = await deliveriesDat.getDeliveryDetail(deliveryId);
+    if (!job || job.courier_id !== courierId || job.status !== 'out_for_delivery') {
+        throw new Error('Job not found or not out for delivery');
+    }
+
+    // rule 2
+    if (job.allow_doorstep && proofType !== 'photo') {
+        throw new Error('Doorstep parcel: photo only');
+    }
+    if (!job.allow_doorstep && !['signature_digital', 'signature_paper'].includes(proofType)) {
+        throw new Error("Receiver's signature required");
+    }
+
+    // rule 3
+    const fileUrl = await fileSer.saveImage(image);
+
+    const changed = await deliveriesDat.updateStatus(deliveryId, 'out_for_delivery', 'delivered', courierId);
+    if (changed === 0) throw new Error('Job was updated by someone else');
+
+    await proofOfDeliveryDat.addProof({ deliveryId, proofType, fileUrl, receivedBy: null, recordedBy: courierId });
+
+    if (job.payment_method === 'cod') {
+        await deliveryPaymentsDat.markCodCollected(deliveryId, courierId);
+    }
+
+    await deliveryStatusHistoryDat.addStatus({
+        deliveryId,
+        oldStatus: 'out_for_delivery',
+        newStatus: 'delivered',
+        changedBy: courierId,
+        note: job.allow_doorstep ? 'Left at doorstep' : 'Signed by receiver',
+    });
+
+    return { message: 'Delivered', deliveryId, fileUrl };
+}
+
+module.exports = { getAvailableJobs, acceptJob, nextStatuses, updateJobStatus, markDelivered };

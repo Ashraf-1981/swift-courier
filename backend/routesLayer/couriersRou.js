@@ -66,4 +66,29 @@ router.post('/jobs/:id/status', verifyToken, requireRole(['courier']), async (re
         res.status(500).json({ error: 'Something went wrong' });
     }
 });
+
+/**
+ * POST /api/couriers/jobs/:id/delivered
+ * Header: Authorization: Bearer <accessToken>
+ * Body: { "proofType": "photo" | "signature_digital" | "signature_paper", "image": "data:image/png;base64,..." }
+ */
+router.post('/jobs/:id/delivered', verifyToken, requireRole(['courier']), async (req, res) => {
+    try {
+        const { proofType, image } = req.body || {};
+        res.json(await couriersSer.markDelivered(req.user.id, Number(req.params.id), { proofType, image }));
+    } catch (err) {
+        console.error('Delivered error:', err.message);
+        if (err.message.includes('not found')) {
+            return res.status(404).json({ error: err.message });
+        }
+        if (err.message.includes('photo only') || err.message.includes('signature') || err.message.includes('PNG or JPG')) {
+            return res.status(400).json({ error: err.message });
+        }
+        if (err.message.includes('someone else')) {
+            return res.status(409).json({ error: err.message });
+        }
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+});
+
 module.exports = router;

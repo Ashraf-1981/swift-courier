@@ -46,4 +46,16 @@ async function markReturnPaid(deliveryId, method) {
   );
   return result.affectedRows;
 }
-module.exports = { createPayment, getPaymentByDeliveryId, markPaid, setReturnFee, markReturnPaid };
+
+// COD delivered: courier collected the cash
+async function markCodCollected(deliveryId, courierId) {
+  const [result] = await pool.query(
+    `UPDATE delivery_payments
+     SET status = 'paid', paid_at = NOW(), collected_by = ?
+     WHERE delivery_id = ? AND method = 'cod' AND status = 'unpaid'`,
+    [courierId, deliveryId]
+  );
+  return result.affectedRows; // 1 = collected, 0 = not COD or already paid
+}
+
+module.exports = { createPayment, getPaymentByDeliveryId, markPaid, setReturnFee, markReturnPaid, markCodCollected };

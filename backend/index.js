@@ -13,7 +13,8 @@ const session = require("express-session");
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // photos as base64 are big
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // show saved proof images
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true })); // read HTML form data
