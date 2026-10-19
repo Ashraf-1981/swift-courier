@@ -88,4 +88,10 @@ router.get('/orders', requireAdminSession, async (req, res) => {
     });
 });
 
+// GET /admin/users → all users, ?role= and ?search= filter the list
+router.get('/users', requireAdminSession, async (req, res) => {
+    const data = await adminSer.getUsers(req.query);
+    res.render('admin/users', { admin: req.session.admin, ...data });
+});
+
 module.exports = router;

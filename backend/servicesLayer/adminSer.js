@@ -4,6 +4,7 @@ const deliveryStatusHistoryDat = require('../dataLayer/deliveryStatusHistoryDat'
 const zonesDat = require('../dataLayer/zonesDat');
 const deliveryPaymentsDat = require('../dataLayer/deliveryPaymentsDat');
 const aiSer = require('./aiSer');
+const usersDat = require('../dataLayer/usersDat');
 
 // Business rule: admin sees warehouse parcels, each with couriers who cover its drop-off zone
 async function getWarehouseParcels() {
@@ -111,4 +112,16 @@ If only one day is mentioned, set both "from" and "to" to that day.`;
     return getOrders(filters);
 }
 
-module.exports = { getWarehouseParcels, assignParcel, getOrders, markOrderPaid, searchOrdersByText };
+const ROLES = ['customer', 'courier', 'admin'];
+
+// Business rule: admin filters users by role and name/email; bad values are ignored
+async function getUsers(query) {
+    const filters = {};
+    if (ROLES.includes(query.role)) filters.role = query.role;
+    if (typeof query.search === 'string' && query.search.trim()) filters.search = query.search.trim();
+
+    const users = await usersDat.getUsers(filters);
+    return { users, filters, roles: ROLES };
+}
+
+module.exports = { getWarehouseParcels, assignParcel, getOrders, markOrderPaid, searchOrdersByText, getUsers };

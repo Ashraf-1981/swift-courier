@@ -23,4 +23,29 @@ async function getUserById(id) {
   return rows[0];
 }
 
-module.exports = { createUser, getUserByEmail, getUserById };
+// admin users list: optional role + name/email search, never the password hash
+async function getUsers({ role, search }) {
+  const where = [];
+  const params = [];
+  if (role) { where.push('u.role = ?'); params.push(role); }
+  if (search) {
+    where.push('(u.name LIKE ? OR u.email LIKE ?)');
+    params.push(`%${search}%`, `%${search}%`);
+  }
+  const whereSql = where.length ? 'WHERE ' + where.join(' AND ') : '';
+
+  const [rows] = await pool.query(
+    `SELECT u.id, u.name, u.email, u.phone, u.role, u.is_express, u.created_at,
+            (SELECT GROUP_CONCAT(z.name ORDER BY z.name SEPARATOR ', ')
+               FROM courier_zones cz JOIN zones z ON z.id = cz.zone_id
+              WHERE cz.courier_id = u.id) AS zones,
+            (SELECT COUNT(*) FROM deliveries d WHERE d.customer_id = u.id) AS order_count
+     FROM users u
+     ${whereSql}
+     ORDER BY u.role, u.name`,
+    params
+  );
+  return rows;
+}
+
+module.exports = { createUser, getUserByEmail, getUserById, getUsers };
