@@ -139,8 +139,28 @@ async function getOrders(filters) {
   );
   return rows;
 }
+// courier's own unfinished jobs, with addresses he needs on the road
+async function getJobsInHand(courierId) {
+  const [rows] = await pool.query(
+    `SELECT d.id, d.tracking_no, d.status, d.delivery_type_id,
+            d.pickup_zone_id, d.dropoff_zone_id, d.allow_doorstep,
+            d.pickup_address, d.dropoff_address,
+            d.dropoff_contact_name, d.dropoff_contact_phone,
+            pz.name AS pickup_zone, dz.name AS dropoff_zone,
+            p.method AS payment_method, p.status AS payment_status, d.total_fee
+     FROM deliveries d
+     JOIN zones pz ON pz.id = d.pickup_zone_id
+     JOIN zones dz ON dz.id = d.dropoff_zone_id
+     LEFT JOIN delivery_payments p ON p.delivery_id = d.id
+     WHERE d.courier_id = ?
+       AND d.status IN ('assigned', 'picked_up', 'out_for_delivery', 'failed')
+     ORDER BY d.updated_at`,
+    [courierId]
+  );
+  return rows;
+}
 
 module.exports = {
   createDelivery, getDeliveryById, getDeliveriesByCustomer,
-  getDeliveryDetail, getOpenJobs, assignCourier, updateStatus, getWarehouseParcels, getOrders
+  getDeliveryDetail, getOpenJobs, assignCourier, updateStatus, getWarehouseParcels, getOrders, getJobsInHand,
 };

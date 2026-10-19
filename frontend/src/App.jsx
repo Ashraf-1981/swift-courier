@@ -7,6 +7,7 @@ import Book from './pages/Book';
 import MyDeliveries from './pages/MyDeliveries';
 import ProtectedRoute from './components/ProtectedRoute';
 import TrackDelivery from './pages/TrackDelivery';
+import CourierJobs from './pages/CourierJobs';
 
 function App() {
   return (
@@ -35,6 +36,15 @@ function App() {
           element={
             <ProtectedRoute role="customer">
               <TrackDelivery />
+            </ProtectedRoute>
+          }
+        />
+        {/* Courier goes to their own jobs page */}
+        <Route
+          path="/courier/jobs"
+          element={
+            <ProtectedRoute role="courier">
+              <CourierJobs />
             </ProtectedRoute>
           }
         />

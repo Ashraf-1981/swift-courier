@@ -91,4 +91,18 @@ router.post('/jobs/:id/delivered', verifyToken, requireRole(['courier']), async 
     }
 });
 
+/**
+ * GET /api/couriers/my-jobs
+ * Header: Authorization: Bearer <accessToken>
+ * The courier's unfinished jobs, each with "next" allowed statuses.
+ */
+router.get('/my-jobs', verifyToken, requireRole(['courier']), async (req, res) => {
+    try {
+        res.json(await couriersSer.getJobsInHand(req.user.id));
+    } catch (err) {
+        console.error('My jobs error:', err.message);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+});
+
 module.exports = router;

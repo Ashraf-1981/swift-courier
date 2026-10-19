@@ -211,5 +211,15 @@ async function markDelivered(courierId, deliveryId, { proofType, image }) {
 
     return { message: 'Delivered', deliveryId, fileUrl };
 }
+// Business rule: courier sees his unfinished jobs, each with the statuses he may pick next
+async function getJobsInHand(courierId) {
+    const jobs = await deliveriesDat.getJobsInHand(courierId);
+    const zones = await couriersDat.getZoneIds(courierId);
+    for (const j of jobs) {
+        const failedCount = await deliveryStatusHistoryDat.countFailed(j.id);
+        j.next = nextStatuses(j, zones, failedCount);
+    }
+    return jobs;
+}
 
-module.exports = { getAvailableJobs, acceptJob, nextStatuses, updateJobStatus, markDelivered };
+module.exports = { getAvailableJobs, acceptJob, nextStatuses, updateJobStatus, markDelivered, getJobsInHand };

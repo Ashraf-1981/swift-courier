@@ -25,7 +25,8 @@ function Login() {
             const res = await axios.post(`${API_URL}/auth/login`, { email, password });
 
             setAuth(res.data);   // save tokens + user in the atom
-            navigate('/');       // go to Home
+            // courier → jobs page, others → Home
+            navigate(res.data.user.role === 'courier' ? '/courier/jobs' : '/');
         } catch (err) {
 
             if (err.response) {
