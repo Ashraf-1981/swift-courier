@@ -5,7 +5,14 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "test": "jest",
+    "coverage": "jest --coverage"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "servicesLayer/**/*.js"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -24,6 +31,7 @@
     "mysql2": "^3.24.5"
   },
   "devDependencies": {
+    "jest": "^30.5.2",
     "nodemon": "^3.1.14"
   },
   "allowScripts": {
