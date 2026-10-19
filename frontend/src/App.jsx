@@ -8,6 +8,7 @@ import MyDeliveries from './pages/MyDeliveries';
 import ProtectedRoute from './components/ProtectedRoute';
 import TrackDelivery from './pages/TrackDelivery';
 import CourierJobs from './pages/CourierJobs';
+import AskSwift from './components/AskSwift';
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
           }
         />
       </Routes>
+      <AskSwift />
     </>
   );
 }

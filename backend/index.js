@@ -9,6 +9,7 @@ const deliveryTypesRou = require("./routesLayer/deliveryTypesRou");
 const zonesRou = require("./routesLayer/zonesRou");
 const path = require("path");
 const adminRou = require("./routesLayer/adminRou");
+const assistantRou = require("./routesLayer/assistantRou");
 const session = require("express-session");
 
 const app = express();
@@ -31,6 +32,7 @@ app.use("/api/deliveries", deliveriesRou);
 app.use("/api/couriers", couriersRou);
 app.use("/api/delivery-types", deliveryTypesRou);
 app.use("/api/zones", zonesRou);
+app.use("/api/assistant", assistantRou);
 app.use("/admin", adminRou);
 
 app.get("/api/health", (req, res) => {

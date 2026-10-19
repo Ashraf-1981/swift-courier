@@ -12,7 +12,7 @@ const deliveryTypesDat = require('../dataLayer/deliveryTypesDat');
 
 /**
  * Business rule: ERP only on weekday peak hours
- * Mon–Fri, 7:30–9:30am and 5:30–8:
+ * Mon–Fri, 7:30–9:30am and 5:30–8pm, otherwise no ERP surcharge
  * we use (pickupTime) as the best guess to replace live GPS
  */
 function isErpPeak(pickupTime) {
@@ -119,6 +119,7 @@ async function calculateTotalFee({deliveryTypeId, pickupZoneId, dropoffZoneId, e
   const baseFee = Number(type.base_fee);
   const distanceFee = distanceKm * Number(type.per_km_rate);
   const stopsFee = extraStops * Number(type.extra_stop_fee);
+  
   // Business rule: collect-back fee shown separately, only charged after the item is collected
   const collectBackFee = collectBack ? Number(type.collect_back_fee) : 0;
 
