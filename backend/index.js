@@ -8,6 +8,7 @@ const couriersRou = require('./routesLayer/couriersRou');
 const deliveryTypesRou = require("./routesLayer/deliveryTypesRou");
 const zonesRou = require("./routesLayer/zonesRou");
 const path = require("path");
+const fs = require("fs");
 const adminRou = require("./routesLayer/adminRou");
 const assistantRou = require("./routesLayer/assistantRou");
 const session = require("express-session");
@@ -75,6 +76,19 @@ app.get("/api/db-check", async (req, res) => {
     res.status(500).json({ connected: false, error: err.message });
   }
 });
+
+// online: serve the built React app; any non-API page → index.html (React Router handles it)
+const reactBuild = path.join(__dirname, "..", "frontend", "dist");
+if (fs.existsSync(reactBuild)) {
+  app.use(express.static(reactBuild));
+  app.use((req, res, next) => {
+    const isBackend = ["/api", "/admin", "/uploads"].some((p) => req.path.startsWith(p));
+    if (req.method === "GET" && !isBackend) {
+      return res.sendFile(path.join(reactBuild, "index.html"));
+    }
+    next();
+  });
+}
 
 // unknown route → 404
 app.use((req, res) => {

@@ -1,5 +1,4 @@
 // connecting Express to database
-
 require("dotenv").config();
 const mysql = require("mysql2/promise");
 
@@ -9,6 +8,8 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: process.env.DB_PORT,
+  // online database (Aiven) needs an encrypted connection; laptop MySQL does not
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
 });
 
 module.exports = pool;
