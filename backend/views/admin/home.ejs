@@ -14,6 +14,10 @@
     <h1>Swift-Courier Admin</h1>
     <% if (admin) { %>
         <p>Hi <%= admin.name %> · <a href="/admin/logout">Log out</a></p>
+        <ul class="list-unstyled mt-3">
+            <li class="mb-2"><a href="/admin/orders" class="btn btn-outline-primary">Orders</a></li>
+            <li class="mb-2"><a href="/admin/warehouse" class="btn btn-outline-primary">Warehouse</a></li>
+        </ul>
         <% } else { %>
             <p>Not logged in · <a href="/admin/login">Log in</a></p>
             <% } %>

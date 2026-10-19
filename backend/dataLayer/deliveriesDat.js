@@ -108,7 +108,39 @@ async function getWarehouseParcels() {
   return rows;
 }
 
+// admin orders list: every filter is optional, ? keeps it safe from SQL injection
+async function getOrders(filters) {
+  const where = [];
+  const params = [];
+
+  if (filters.status) { where.push('d.status = ?'); params.push(filters.status); }
+  if (filters.payment) { where.push('p.status = ?'); params.push(filters.payment); }
+  if (filters.zoneId) {
+    where.push('(d.pickup_zone_id = ? OR d.dropoff_zone_id = ?)');
+    params.push(filters.zoneId, filters.zoneId);
+  }
+  if (filters.from) { where.push('DATE(d.created_at) >= ?'); params.push(filters.from); }
+  if (filters.to) { where.push('DATE(d.created_at) <= ?'); params.push(filters.to); }
+
+  const whereSql = where.length ? 'WHERE ' + where.join(' AND ') : '';
+
+  const [rows] = await pool.query(
+    `SELECT d.id, d.tracking_no, d.status, d.total_fee, d.created_at,
+            u.name AS customer, pz.name AS pickup_zone, dz.name AS dropoff_zone,
+            p.method AS pay_method, p.status AS pay_status
+     FROM deliveries d
+     JOIN users u ON u.id = d.customer_id
+     JOIN zones pz ON pz.id = d.pickup_zone_id
+     JOIN zones dz ON dz.id = d.dropoff_zone_id
+     LEFT JOIN delivery_payments p ON p.delivery_id = d.id
+     ${whereSql}
+     ORDER BY d.created_at DESC`,
+    params
+  );
+  return rows;
+}
+
 module.exports = {
   createDelivery, getDeliveryById, getDeliveriesByCustomer,
-  getDeliveryDetail, getOpenJobs, assignCourier, updateStatus, getWarehouseParcels
+  getDeliveryDetail, getOpenJobs, assignCourier, updateStatus, getWarehouseParcels, getOrders
 };

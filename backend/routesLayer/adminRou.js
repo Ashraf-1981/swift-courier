@@ -48,23 +48,42 @@ router.get('/warehouse', requireAdminSession, async (req, res) => {
         msg: req.query.msg,
         error: req.query.error,
     });
+});
+/**
+ * POST /admin/warehouse/:id/assign
+ * Business rules:
+ * 1. Admin only (session)
+ * 2. Rules are checked in adminSer.assignParcel
+ * 3. Go back to the warehouse list with a message
+ */
+router.post('/warehouse/:id/assign', requireAdminSession, async (req, res) => {
+    try {
+        const deliveryId = Number(req.params.id);
+        const courierId = Number(req.body.courierId);
+        await adminSer.assignParcel(req.session.admin.id, deliveryId, courierId);
+        res.redirect('/admin/warehouse?msg=' + encodeURIComponent('Parcel handed out'));
+    } catch (err) {
+        res.redirect('/admin/warehouse?error=' + encodeURIComponent(err.message));
+    }
+});
+// GET /admin/orders → all orders, filters come from the query string
+router.get('/orders', requireAdminSession, async (req, res) => {
+    const data = await adminSer.getOrders(req.query);
+    res.render('admin/orders', {
+        admin: req.session.admin,
+        ...data,
+        msg: req.query.msg,
+        error: req.query.error,
     });
-    /**
-     * POST /admin/warehouse/:id/assign
-     * Business rules:
-     * 1. Admin only (session)
-     * 2. Rules are checked in adminSer.assignParcel
-     * 3. Go back to the warehouse list with a message
-     */
-    router.post('/warehouse/:id/assign', requireAdminSession, async (req, res) => {
+    // POST /admin/orders/:id/paid → rules are in adminSer.markOrderPaid
+    router.post('/orders/:id/paid', requireAdminSession, async (req, res) => {
         try {
-            const deliveryId = Number(req.params.id);
-            const courierId = Number(req.body.courierId);
-            await adminSer.assignParcel(req.session.admin.id, deliveryId, courierId);
-            res.redirect('/admin/warehouse?msg=' + encodeURIComponent('Parcel handed out'));
+            await adminSer.markOrderPaid(Number(req.params.id));
+            res.redirect('/admin/orders?msg=' + encodeURIComponent('Order marked paid'));
         } catch (err) {
-            res.redirect('/admin/warehouse?error=' + encodeURIComponent(err.message));
+            res.redirect('/admin/orders?error=' + encodeURIComponent(err.message));
         }
+    })
     });
 
     module.exports = router;
