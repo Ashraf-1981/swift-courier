@@ -30,6 +30,7 @@ const aiLimiter = rateLimit({
 });
 
 const app = express();
+app.set("trust proxy", 1); // online (Render) requests come through 1 proxy; use the real visitor IP
 // log every request: method, url, status, time taken
 app.use((req, res, next) => {
   const start = Date.now();
