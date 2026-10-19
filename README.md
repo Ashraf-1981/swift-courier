@@ -121,6 +121,25 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 cd backend
 npm test            # run all tests
 npm run coverage    # tests + coverage report
+```
+
+![Coverage](docs/coverage.png)
+
+### Manual test cases
+| # | Test | Steps | Expected | Result |
+|---|------|-------|----------|--------|
+| 1 | Login redirect by role | Log in as courier, then as customer | Courier → My jobs; customer → Home | Pass |
+| 2 | Booking price | Book: change vehicle / stops / time | Price updates; ERP only at peak | Pass |
+| 3 | Status filter | My Deliveries → pick "Delivered" | Only delivered cards show | Pass |
+| 4 | Courier accept | My jobs → Accept | "Job accepted"; job moves to Jobs in hand | Pass |
+| 5 | Signature proof | Out for delivery → Delivered → sign → Save | "Delivered"; image saved | Pass |
+| 6 | Admin filters | Orders → Pending + Unpaid → Filter | Only matching rows; dropdowns stay selected | Pass |
+| 7 | Admin AI search | Type "delivered parcels going to Orchard" | Filters set to Delivered + Orchard | Pass |
+| 8 | Mark paid | Click Mark paid on unpaid PayNow | Green message; row shows paid | Pass |
+| 9 | Ask Swift | Ask "Do you deliver to Malaysia?" | "Not sure, contact support" (no made-up answer) | Pass |
+| 10 | Rate limit | 11 wrong logins in a row | 11th returns 429 "Too many login attempts" | Pass |
+| 11 | Gemini down | Wi-Fi off, ask Ask Swift | Friendly error; reason in `logs/app.log` | Pass |
+| 12 | Wrong role | Customer opens `/courier/jobs` | Sent back to Home | Pass |
 
 
 ## 7. Deployment
@@ -152,10 +171,11 @@ Set in Render (and in `backend/.env` locally, which is not committed):
 3. Add the environment variables above, then deploy.
 4. Check `/api/db-check` shows `"connected": true`.
 
-### Run locally
 ```bash
 cd backend && npm install && npm run dev      # http://localhost:3000
 cd frontend && npm install && npm run dev     # http://localhost:5173
+```
+Run the SQL files in `backend/sql/` in order, then `node seed-knowledge.js` once for the AI help texts.
 
 
 ## 8. Credits
