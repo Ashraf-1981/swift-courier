@@ -2,6 +2,7 @@ const express = require('express');
 const deliveriesSer = require('../servicesLayer/deliveriesSer');
 const { verifyToken, requireRole } = require('../middleware/authMid');
 const paymentsSer = require('../servicesLayer/paymentsSer');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.post('/', verifyToken, requireRole(['customer']), async (req, res) => {
         const delivery = await deliveriesSer.createDelivery(req.user.id, req.body || {});
         res.status(201).json(delivery);
     } catch (err) {
-        console.error('Book error:', err.message, '| pickup sent:', req.body.scheduledPickupAt);
+        logger.error('Book error:', err.message, '| pickup sent:', req.body.scheduledPickupAt);
         if (err.message.includes('not found')) {
             return res.status(404).json({ error: err.message });
         }

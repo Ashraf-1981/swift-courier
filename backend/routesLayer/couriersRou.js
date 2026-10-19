@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { verifyToken, requireRole } = require('../middleware/authMid');
 const couriersSer = require('../servicesLayer/couriersSer');
+const logger = require('../utils/logger');
 
 /**
  * GET /api/couriers/jobs
@@ -12,7 +13,7 @@ router.get('/jobs', verifyToken, requireRole(['courier']), async (req, res) => {
     try {
         res.json(await couriersSer.getAvailableJobs(req.user.id));
     } catch (err) {
-        console.error('Courier jobs error:', err.message);
+        logger.error('Courier jobs error:', err.message);
         if (err.message.includes('not found')) {
             return res.status(404).json({ error: err.message });
         }
@@ -29,7 +30,7 @@ router.post('/jobs/:id/accept', verifyToken, requireRole(['courier']), async (re
     try {
         res.json(await couriersSer.acceptJob(req.user.id, Number(req.params.id)));
     } catch (err) {
-        console.error('Accept job error:', err.message);
+        logger.error('Accept job error:', err.message);
         if (err.message.includes('not available')) {
             return res.status(404).json({ error: err.message });
         }
@@ -53,7 +54,7 @@ router.post('/jobs/:id/status', verifyToken, requireRole(['courier']), async (re
         const { status, reason } = req.body || {};
         res.json(await couriersSer.updateJobStatus(req.user.id, Number(req.params.id), status, reason));
     } catch (err) {
-        console.error('Job status error:', err.message);
+        logger.error('Job status error:', err.message);
         if (err.message.includes('not found')) {
             return res.status(404).json({ error: err.message });
         }
@@ -77,7 +78,7 @@ router.post('/jobs/:id/delivered', verifyToken, requireRole(['courier']), async 
         const { proofType, image } = req.body || {};
         res.json(await couriersSer.markDelivered(req.user.id, Number(req.params.id), { proofType, image }));
     } catch (err) {
-        console.error('Delivered error:', err.message);
+        logger.error('Delivered error:', err.message);
         if (err.message.includes('not found')) {
             return res.status(404).json({ error: err.message });
         }
@@ -100,7 +101,7 @@ router.get('/my-jobs', verifyToken, requireRole(['courier']), async (req, res) =
     try {
         res.json(await couriersSer.getJobsInHand(req.user.id));
     } catch (err) {
-        console.error('My jobs error:', err.message);
+        logger.error('My jobs error:', err.message);
         res.status(500).json({ error: 'Something went wrong' });
     }
 });

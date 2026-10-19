@@ -3,6 +3,7 @@ const router = express.Router();
 const authSer = require('../servicesLayer/authSer');
 const adminSer = require('../servicesLayer/adminSer');
 const { requireAdminSession } = require('../middleware/authMid');
+const logger = require('../utils/logger');
 
 // GET /admin → admin home page
 router.get('/', requireAdminSession, (req, res) => {
@@ -75,7 +76,7 @@ router.get('/orders', requireAdminSession, async (req, res) => {
             ? await adminSer.searchOrdersByText(req.query.ask)
             : await adminSer.getOrders(req.query);
     } catch (err) {
-        console.error('Orders search error:', err.message);
+        logger.error('Orders search error:', err.message);
         error = 'AI search is not available right now, use the filters instead';
         data = await adminSer.getOrders({});
     }
