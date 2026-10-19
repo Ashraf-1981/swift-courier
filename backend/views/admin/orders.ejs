@@ -28,6 +28,11 @@
                     <%= error %>
                 </div>
                 <% } %>
+                    <form method="GET" action="/admin/orders" class="d-flex gap-2 mb-2">
+                        <input type="text" name="ask" class="form-control" maxlength="200"
+                            placeholder='Ask AI, e.g. "unpaid orders to Orchard last week"' value="<%= ask %>">
+                        <button class="btn btn-dark">AI search</button>
+                    </form>
                     <form method="GET" action="/admin/orders" class="row g-2 mb-3">
                         <div class="col-md-2">
                             <select name="status" class="form-select">
@@ -75,13 +80,14 @@
                     <div class="table-responsive">
                         <table class="table align-middle">
                             <tr class="table-secondary">
-                            <th>Tracking no</th>
-                            <th>Customer</th>
-                            <th>Pickup → Drop-off</th>
-                            <th>Status</th>
-                            <th>Fee</th>
-                            <th>Payment</th>
-                            <th>Created</th>
+                                <th>Tracking no</th>
+                                <th>Customer</th>
+                                <th>Pickup</th>
+                                <th>Drop-off</th>
+                                <th>Status</th>
+                                <th>Fee</th>
+                                <th>Payment</th>
+                                <th>Created</th>
                             </tr>
                             <% orders.forEach((o)=> { %>
                                 <tr>
@@ -92,7 +98,10 @@
                                         <%= o.customer %>
                                     </td>
                                     <td>
-                                        <%= o.pickup_zone %> → <%= o.dropoff_zone %>
+                                        <%= o.pickup_zone %>
+                                    </td>
+                                    <td>
+                                        <%= o.dropoff_zone %>
                                     </td>
                                     <td>
                                         <%= o.status %>

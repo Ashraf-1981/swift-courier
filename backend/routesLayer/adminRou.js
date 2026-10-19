@@ -66,24 +66,26 @@ router.post('/warehouse/:id/assign', requireAdminSession, async (req, res) => {
         res.redirect('/admin/warehouse?error=' + encodeURIComponent(err.message));
     }
 });
-// GET /admin/orders → all orders, filters come from the query string
+// GET /admin/orders → all orders; ?ask=... uses AI search, otherwise the dropdown filters
 router.get('/orders', requireAdminSession, async (req, res) => {
-    const data = await adminSer.getOrders(req.query);
+    let data;
+    let error = req.query.error;
+    try {
+        data = req.query.ask
+            ? await adminSer.searchOrdersByText(req.query.ask)
+            : await adminSer.getOrders(req.query);
+    } catch (err) {
+        console.error('Orders search error:', err.message);
+        error = 'AI search is not available right now, use the filters instead';
+        data = await adminSer.getOrders({});
+    }
     res.render('admin/orders', {
         admin: req.session.admin,
         ...data,
+        ask: req.query.ask || '',
         msg: req.query.msg,
-        error: req.query.error,
+        error,
     });
-    // POST /admin/orders/:id/paid → rules are in adminSer.markOrderPaid
-    router.post('/orders/:id/paid', requireAdminSession, async (req, res) => {
-        try {
-            await adminSer.markOrderPaid(Number(req.params.id));
-            res.redirect('/admin/orders?msg=' + encodeURIComponent('Order marked paid'));
-        } catch (err) {
-            res.redirect('/admin/orders?error=' + encodeURIComponent(err.message));
-        }
-    })
-    });
+});
 
-    module.exports = router;
+module.exports = router;

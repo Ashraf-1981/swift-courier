@@ -32,21 +32,38 @@
 // })();
 
 // Admin marks an unpaid order
+// const adminSer = require('./servicesLayer/adminSer');
+
+// (async () => {
+//   const { orders } = await adminSer.getOrders({ payment: 'unpaid' });
+//   const id = orders[0].id;
+//   console.log('TRY:', orders[0].tracking_no);
+
+//   try { console.log('1st:', await adminSer.markOrderPaid(id)); }
+//   catch (e) { console.log('1st ERROR:', e.message); }
+
+//   try { console.log('2nd:', await adminSer.markOrderPaid(id)); }
+//   catch (e) { console.log('2nd ERROR:', e.message); }
+
+//   try { await adminSer.markOrderPaid(99999); }
+//   catch (e) { console.log('MISSING:', e.message); }
+
+//   process.exit();
+// })();
+
+require('dotenv').config();
 const adminSer = require('./servicesLayer/adminSer');
 
 (async () => {
-  const { orders } = await adminSer.getOrders({ payment: 'unpaid' });
-  const id = orders[0].id;
-  console.log('TRY:', orders[0].tracking_no);
-
-  try { console.log('1st:', await adminSer.markOrderPaid(id)); }
-  catch (e) { console.log('1st ERROR:', e.message); }
-
-  try { console.log('2nd:', await adminSer.markOrderPaid(id)); }
-  catch (e) { console.log('2nd ERROR:', e.message); }
-
-  try { await adminSer.markOrderPaid(99999); }
-  catch (e) { console.log('MISSING:', e.message); }
-
+  const searches = [
+    'unpaid orders',
+    'delivered parcels going to Orchard',
+    'orders from 16 October 2026',
+  ];
+  for (const s of searches) {
+    const res = await adminSer.searchOrdersByText(s);
+    console.log('\nSEARCH:', s);
+    console.log('FILTERS:', res.filters, '→', res.orders.length, 'orders');
+  }
   process.exit();
 })();

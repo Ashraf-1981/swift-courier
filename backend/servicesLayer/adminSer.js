@@ -3,6 +3,7 @@ const couriersDat = require('../dataLayer/couriersDat');
 const deliveryStatusHistoryDat = require('../dataLayer/deliveryStatusHistoryDat');
 const zonesDat = require('../dataLayer/zonesDat');
 const deliveryPaymentsDat = require('../dataLayer/deliveryPaymentsDat');
+const aiSer = require('./aiSer');
 
 // Business rule: admin sees warehouse parcels, each with couriers who cover its drop-off zone
 async function getWarehouseParcels() {
@@ -86,4 +87,28 @@ async function markOrderPaid(deliveryId) {
     return { message: 'Order marked paid', deliveryId };
 }
 
-module.exports = { getWarehouseParcels, assignParcel, getOrders, markOrderPaid };
+/**
+ * Business rules: admin searches orders in plain English (structured generation)
+ * 1. Gemini turns the sentence into JSON filters, using our real statuses and zones
+ * 2. The JSON goes through getOrders, so any wrong value is ignored there
+ */
+async function searchOrdersByText(text) {
+    if (!text || !text.trim()) throw new Error('Please type what you are looking for');
+
+    const zones = await zonesDat.getAllZones();
+    const today = new Date().toISOString().slice(0, 10);
+
+    const rules = `You turn an admin's search sentence into JSON filters for a courier orders list.
+Return ONLY this JSON shape, leaving out any filter that is not mentioned:
+{"status": string, "payment": string, "zoneId": number, "from": "YYYY-MM-DD", "to": "YYYY-MM-DD"}
+status must be one of: ${STATUSES.join(', ')}
+payment must be one of: unpaid, paid
+zoneId must be one of these ids: ${zones.map((z) => `${z.id}=${z.name}`).join(', ')}
+Today is ${today}. Work out dates like "yesterday" or "last week" from today.
+If only one day is mentioned, set both "from" and "to" to that day.`;
+
+    const filters = await aiSer.askJson(rules, text);
+    return getOrders(filters);
+}
+
+module.exports = { getWarehouseParcels, assignParcel, getOrders, markOrderPaid, searchOrdersByText };
