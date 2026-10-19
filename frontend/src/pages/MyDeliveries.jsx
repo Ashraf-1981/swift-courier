@@ -7,6 +7,12 @@ function MyDeliveries() {
   const [deliveries, setDeliveries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  // empty = show all
+  const shown = statusFilter
+    ? deliveries.filter((d) => d.status === statusFilter)
+    : deliveries;
 
   useEffect(() => {
     async function load() {
@@ -29,6 +35,23 @@ function MyDeliveries() {
       <h2 className="mb-4">My deliveries</h2>
 
       {error && <div className="alert alert-danger">{error}</div>}
+      {deliveries.length > 0 && (
+        <select
+          className="form-select mb-4"
+          style={{ maxWidth: 260 }}
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">All statuses</option>
+          {Object.keys(STATUS).map((key) => (
+            <option key={key} value={key}>{STATUS[key].label}</option>
+          ))}
+        </select>
+      )}
+
+      {deliveries.length > 0 && shown.length === 0 && (
+        <p className="text-muted">No deliveries with this status.</p>
+      )}
 
       {!error && deliveries.length === 0 && (
         <p>
@@ -36,7 +59,7 @@ function MyDeliveries() {
         </p>
       )}
 
-      {deliveries.map((d) => {
+      {shown.map((d) => {
         const status = STATUS[d.status];
         return (
           <Link to={`/track-delivery/${d.id}`} className="card mb-3 text-decoration-none text-reset" key={d.id}>
