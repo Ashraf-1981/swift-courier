@@ -1,4 +1,4 @@
-// const deliveriesDat = require('./dataLayer/deliveriesDat');
+// const deliveriesDat = require('../../dataLayer/deliveriesDat');
 
 // (async () => {
 //   const all = await deliveriesDat.getOrders({});
@@ -19,7 +19,7 @@
 
 
 // Good filters pass through, and the bad ones are dropped, so you get all 8 orders.
-// const adminSer = require('./servicesLayer/adminSer');
+// const adminSer = require('../../servicesLayer/adminSer');
 
 // (async () => {
 //   const good = await adminSer.getOrders({ status: 'delivered', payment: 'paid' });
@@ -32,7 +32,7 @@
 // })();
 
 // Admin marks an unpaid order
-// const adminSer = require('./servicesLayer/adminSer');
+// const adminSer = require('../../servicesLayer/adminSer');
 
 // (async () => {
 //   const { orders } = await adminSer.getOrders({ payment: 'unpaid' });
@@ -52,7 +52,7 @@
 // })();
 
 require('dotenv').config();
-const adminSer = require('./servicesLayer/adminSer');
+const adminSer = require('../../servicesLayer/adminSer');
 
 (async () => {
   const searches = [

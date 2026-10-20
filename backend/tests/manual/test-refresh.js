@@ -1,4 +1,4 @@
-const authSer = require('./servicesLayer/authSer');
+const authSer = require('../../servicesLayer/authSer');
 
 (async () => {
     const { accessToken, refreshToken } = await authSer.login({ email: 'ali@swift.com', password: 'password123' });

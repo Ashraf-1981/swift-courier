@@ -1,4 +1,4 @@
-const fileSer = require('./servicesLayer/fileSer');
+const fileSer = require('../../servicesLayer/fileSer');
 
 (async () => {
   // tiny 1x1 PNG

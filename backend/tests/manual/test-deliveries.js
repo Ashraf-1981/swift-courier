@@ -1,4 +1,4 @@
-const deliveriesDat = require('./dataLayer/deliveriesDat');
+const deliveriesDat = require('../../dataLayer/deliveriesDat');
 
 (async () => {
   const id = await deliveriesDat.createDelivery({

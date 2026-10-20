@@ -1,4 +1,4 @@
-const couriersSer = require('./servicesLayer/couriersSer');
+const couriersSer = require('../../servicesLayer/couriersSer');
 
 (async () => {
   const jobs = await couriersSer.getJobsInHand(9); // Ahmad

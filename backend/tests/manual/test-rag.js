@@ -1,5 +1,5 @@
 // require('dotenv').config();
-// const assistantSer = require('./servicesLayer/assistantSer');
+// const assistantSer = require('../../servicesLayer/assistantSer');
 
 // (async () => {
 //   const questions = [
@@ -17,7 +17,7 @@
 // })();
 
 require('dotenv').config();
-const assistantSer = require('./servicesLayer/assistantSer');
+const assistantSer = require('../../servicesLayer/assistantSer');
 
 const SITI_ID = 3;
 

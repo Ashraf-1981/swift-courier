@@ -1,4 +1,4 @@
-const dat = require('./dataLayer/zonesDat');
+const dat = require('../../dataLayer/zonesDat');
 
 (async () => {
   console.log(await dat.getAllZones());

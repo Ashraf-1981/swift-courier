@@ -1,4 +1,4 @@
-const usersDat = require('./dataLayer/usersDat');
+const usersDat = require('../../dataLayer/usersDat');
 
 (async () => {
   const id = await usersDat.createUser({

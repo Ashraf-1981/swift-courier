@@ -1,4 +1,4 @@
-const adminSer = require('./servicesLayer/adminSer');
+const adminSer = require('../../servicesLayer/adminSer');
 
 (async () => {
   // 1. parcels at the warehouse

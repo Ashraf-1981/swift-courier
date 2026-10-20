@@ -1,5 +1,5 @@
-const pool = require('./db');
-const deliveriesSer = require('./servicesLayer/deliveriesSer');
+const pool = require('../../db');
+const deliveriesSer = require('../../servicesLayer/deliveriesSer');
 
 (async () => {
   const d = await deliveriesSer.createDelivery(3, {

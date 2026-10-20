@@ -1,4 +1,4 @@
-const deliveriesSer = require('./servicesLayer/deliveriesSer');
+const deliveriesSer = require('../../servicesLayer/deliveriesSer');
 
 const goodForm = {
     deliveryTypeId: 1, pickupZoneId: 1, dropoffZoneId: 2,
