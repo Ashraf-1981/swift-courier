@@ -6,6 +6,7 @@ import { useAtomValue } from 'jotai';
 import { authAtom } from '../atoms/authAtom';
 import ZoneSelect from '../components/ZoneSelect';
 import PriceBox from '../components/PriceBox';
+import VehiclePicker from '../components/VehiclePicker';
 
 function Book() {
     // lists from the backend
@@ -154,23 +155,7 @@ function Book() {
 
             {/* 1. Vehicle */}
             <h5>1. Choose a vehicle</h5>
-            <div className="row g-3 mb-4">
-                {types.map((type) => (
-                    <div className="col-6 col-md-4" key={type.id}>
-                        <div
-                            className={`card h-100 ${deliveryTypeId === type.id ? 'border-primary border-2' : ''}`}
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => setDeliveryTypeId(type.id)}
-                        >
-                            <div className="card-body">
-                                <h6 className="card-title">{type.name}</h6>
-                                <p className="small text-muted mb-1">{type.suitable_for}</p>
-                                <p className="small mb-0">From ${type.base_fee} - max {type.max_weight_kg} kg</p>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
+            <VehiclePicker types={types} selectedId={deliveryTypeId} onSelect={setDeliveryTypeId} />
 
             {/* 2. Areas */}
             <h5>2. Pickup and drop-off area</h5>
