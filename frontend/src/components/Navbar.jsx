@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import axios from 'axios';
@@ -7,6 +8,7 @@ import { authAtom } from '../atoms/authAtom';
 function Navbar() {
     const [auth, setAuth] = useAtom(authAtom); // read AND write
     const navigate = useNavigate();
+    const [open, setOpen] = useState(false); // mobile menu open?
 
     async function handleLogout() {
         try {
@@ -15,29 +17,39 @@ function Navbar() {
             // server unreachable: still log out on this browser
         } finally {
             setAuth(null);        // clear the atom + localStorage
+            setOpen(false);
             navigate('/login');
         }
     }
 
     return (
-        <nav className="navbar navbar-expand navbar-dark bg-dark px-4">
-            <Link to="/" className="navbar-brand">Swift-Courier</Link>
-            <div className="navbar-nav ms-auto">
-                <Link to="/" className="nav-link">Home</Link>
-                {auth ? (
-                    <>
-                        <Link to="/my-deliveries" className="nav-link">My deliveries</Link>
-                        <span className="nav-link">Hi {auth.user.name}</span>
-                        <button className="btn btn-outline-light btn-sm ms-2" onClick={handleLogout}>
-                            Log out
-                        </button>
-                    </>
-                ) : (
-                    <>
-                        <Link to="/login" className="nav-link">Log in</Link>
-                        <Link to="/register" className="nav-link">Sign up</Link>
-                    </>
-                )}
+        <nav className="navbar navbar-expand-md navbar-dark bg-dark px-4">
+            <Link to="/" className="navbar-brand" onClick={() => setOpen(false)}>Swift-Courier</Link>
+            <button className="navbar-toggler" type="button" onClick={() => setOpen(!open)}>
+                <span className="navbar-toggler-icon"></span>
+            </button>
+            <div className={`collapse navbar-collapse ${open ? 'show' : ''}`}>
+                <div className="navbar-nav ms-auto align-items-md-center" onClick={() => setOpen(false)}>
+                    <Link to="/" className="nav-link">Home</Link>
+                    {auth ? (
+                        <>
+                            {auth.user.role === 'courier' ? (
+                                <Link to="/courier/jobs" className="nav-link">My jobs</Link>
+                            ) : (
+                                <Link to="/my-deliveries" className="nav-link">My deliveries</Link>
+                            )}
+                            <span className="nav-link">Hi {auth.user.name}</span>
+                            <button className="btn btn-outline-light btn-sm ms-md-2 mt-2 mt-md-0" onClick={handleLogout}>
+                                Log out
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/login" className="nav-link">Log in</Link>
+                            <Link to="/register" className="nav-link">Sign up</Link>
+                        </>
+                    )}
+                </div>
             </div>
         </nav>
     );
