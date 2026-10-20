@@ -71,8 +71,9 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 - **Booking:** live price, auto vehicle upgrade, extra stops, doorstep / collect-back options, PayNow / card / COD (simulated payment).
 - **Tracking:** My Deliveries with status filter, delivery detail with status history.
 - **Courier:** available jobs, accept (first wins), status buttons, photo or signature proof, failed / returned flow.
-- **Admin (EJS):** warehouse hand-out, orders with filters + mark paid, users list.
-- **AI:** Ask Swift (RAG) for customers; plain-English order search for admin.
+- **Admin (EJS):** warehouse hand-out, orders with filters (status, payment, zone, date range) + mark paid, users list. Admins can only log in at `/admin/login`.
+- **AI:** Ask Swift (RAG) for customers; plain-English order search for admin. If Gemini is busy, a lighter backup model answers.
+- **UI:** home page with hero band and vehicle popup (Standard vs 4-Hour), mobile menu, footer; works at phone width.
 - **Security:** JWT access + refresh tokens with logout blacklist, role checks, rate limiting, bcrypt passwords.
 
 ### Algorithms
@@ -84,10 +85,9 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 - Payment is simulated (no Stripe).
 - Proof photos are not kept after a Render restart (no permanent disk on the free plan).
 - Free hosting sleeps when idle; first load is slow.
-- Navbar has no mobile menu yet.
 
 ### Pending
-- Stripe test payments, CSRF protection, mobile navbar, live GPS tracking.
+- Stripe test payments, CSRF protection, n8n agent, live GPS tracking(use simulated distance formula)
 
 
 ## 4. Use Cases
@@ -159,7 +159,8 @@ Set in Render (and in `backend/.env` locally, which is not committed):
 | `DB_SSL` | `true` online (Aiven needs encryption) |
 | `TOKEN_SECRET`, `REFRESH_TOKEN_SECRET` | Sign JWT access / refresh tokens |
 | `SESSION_SECRET` | Sign the admin session cookie |
-| `GEMINI_API_KEY`, `GEMINI_MODEL` | Gemini AI |
+| `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL` | Gemini AI (main + backup model) |
+| `DEMO_PASSWORD` | Password for the demo accounts (local seed only) |
 
 `PORT` is set by Render automatically.
 
@@ -175,7 +176,7 @@ Set in Render (and in `backend/.env` locally, which is not committed):
 cd backend && npm install && npm run dev      # http://localhost:3000
 cd frontend && npm install && npm run dev     # http://localhost:5173
 ```
-Run the SQL files in `backend/sql/` in order, then `node scripts/seed-knowledge.js` once for the AI help texts.
+Run the SQL files in `backend/sql/` in order, then `node scripts/seed-knowledge.js` once for the AI help texts and `node scripts/seed-demo-users.js` for the demo accounts. Manual check scripts are in `backend/tests/manual/`.
 
 
 ## 8. Credits
