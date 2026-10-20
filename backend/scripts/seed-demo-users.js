@@ -18,6 +18,8 @@ const USERS = [
     // customers
     { name: 'Siti', email: 'siti@swift.com', role: 'customer' },
     { name: 'Tom', email: 'tom@swift.com', role: 'customer' },
+    // admin (EJS dashboard)
+    { name: 'Admin', email: 'admin@swift.com', role: 'admin' },
 ];
 
 (async () => {

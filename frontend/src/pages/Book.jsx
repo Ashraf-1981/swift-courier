@@ -4,6 +4,9 @@ import { API_URL } from '../api';
 import api from '../apiClient';
 import { useAtomValue } from 'jotai';
 import { authAtom } from '../atoms/authAtom';
+import ZoneSelect from '../components/ZoneSelect';
+import PriceBox from '../components/PriceBox';
+import VehiclePicker from '../components/VehiclePicker';
 
 function Book() {
     // lists from the backend
@@ -11,7 +14,6 @@ function Book() {
     const [zones, setZones] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-
     // the user's selections
     const [deliveryTypeId, setDeliveryTypeId] = useState(null);
     const [pickupZoneId, setPickupZoneId] = useState('');
@@ -94,9 +96,6 @@ function Book() {
         getQuote();
     }, [deliveryTypeId, pickupZoneId, dropoffZoneId, weightKg, lengthCm, widthCm, heightCm, extraStops, scheduledPickupAt, collectBack]);
 
-    // the zones users picked (to show their warning notes)
-    const pickupZone = zones.find((z) => z.id === Number(pickupZoneId));
-    const dropoffZone = zones.find((z) => z.id === Number(dropoffZoneId));
     // the vehicle user picked (to show its limits)
     const selectedType = types.find((t) => t.id === deliveryTypeId);
 
@@ -155,48 +154,13 @@ function Book() {
 
             {/* 1. Vehicle */}
             <h5>1. Choose a vehicle</h5>
-            <div className="row g-3 mb-4">
-                {types.map((type) => (
-                    <div className="col-6 col-md-4" key={type.id}>
-                        <div
-                            className={`card h-100 ${deliveryTypeId === type.id ? 'border-primary border-2' : ''}`}
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => setDeliveryTypeId(type.id)}
-                        >
-                            <div className="card-body">
-                                <h6 className="card-title">{type.name}</h6>
-                                <p className="small text-muted mb-1">{type.suitable_for}</p>
-                                <p className="small mb-0">From ${type.base_fee} - max {type.max_weight_kg} kg</p>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
+            <VehiclePicker types={types} selectedId={deliveryTypeId} onSelect={setDeliveryTypeId} />
 
             {/* 2. Areas */}
             <h5>2. Pickup and drop-off area</h5>
             <div className="row g-3 mb-4">
-                <div className="col-md-6">
-                    <label className="form-label">Pickup area</label>
-                    <select className="form-select" value={pickupZoneId} onChange={(e) => setPickupZoneId(e.target.value)}>
-                        <option value="">Choose...</option>
-                        {zones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
-                    </select>
-                    {pickupZone && pickupZone.restricted_note && (
-                        <small className="text-danger">⚠ {pickupZone.restricted_note}</small>
-                    )}
-                </div>
-
-                <div className="col-md-6">
-                    <label className="form-label">Drop-off area</label>
-                    <select className="form-select" value={dropoffZoneId} onChange={(e) => setDropoffZoneId(e.target.value)}>
-                        <option value="">Choose...</option>
-                        {zones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
-                    </select>
-                    {dropoffZone && dropoffZone.restricted_note && (
-                        <small className="text-danger">⚠ {dropoffZone.restricted_note}</small>
-                    )}
-                </div>
+                <ZoneSelect label="Pickup area" zones={zones} value={pickupZoneId} onChange={setPickupZoneId} />
+                <ZoneSelect label="Drop-off area" zones={zones} value={dropoffZoneId} onChange={setDropoffZoneId} />
             </div>
 
             {/* 3. Addresses and contacts */}
@@ -277,41 +241,7 @@ function Book() {
 
             {/* 5. Price */}
             <h5>5. Price</h5>
-            <div className="card mb-4">
-                <div className="card-body">
-                    {!quote && !quoteError && (
-                        <p className="text-muted mb-0">Fill in vehicle, areas and parcel size to see the price.</p>
-                    )}
-
-                    {quoteError && <div className="alert alert-danger mb-0">{quoteError}</div>}
-
-                    {quote && (
-                        <>
-                            {quote.vehicle.upgraded && (
-                                <div className="alert alert-warning">
-                                    Your parcel doesn't fit the vehicle you chose, so it's moved to{' '}
-                                    <strong>{quote.vehicle.suggested}</strong>.
-                                </div>
-                            )}
-                            <table className="table table-sm mb-0">
-                                <tbody>
-                                    <tr><td>Base fee ({quote.vehicle.suggested})</td><td className="text-end">${quote.fee.base_fee.toFixed(2)}</td></tr>
-                                    <tr><td>Distance ({quote.fee.distance_km} km)</td><td className="text-end">${quote.fee.distance_fee.toFixed(2)}</td></tr>
-                                    <tr><td>Extra stops</td><td className="text-end">${quote.fee.stops_fee.toFixed(2)}</td></tr>
-                                    <tr><td>Surcharges</td><td className="text-end">${quote.fee.surcharge_total.toFixed(2)}</td></tr>
-                                    {quote.fee.collect_back_fee > 0 && (
-                                        <tr className="text-muted">
-                                            <td>Collect-back (charged only after collection)</td>
-                                            <td className="text-end">${quote.fee.collect_back_fee.toFixed(2)}</td>
-                                        </tr>
-                                    )}
-                                    <tr className="fw-bold"><td>Total</td><td className="text-end">${quote.fee.total_fee.toFixed(2)}</td></tr>
-                                </tbody>
-                            </table>
-                        </>
-                    )}
-                </div>
-            </div>
+            <PriceBox quote={quote} quoteError={quoteError} />
 
             {/* 6. Payment and options */}
             <h5>6. Payment and options</h5>
