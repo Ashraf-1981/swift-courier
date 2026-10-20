@@ -99,5 +99,24 @@ router.post('/:id/pay-return', verifyToken, requireRole(['customer']), async (re
         res.status(500).json({ error: 'Something went wrong' });
     }
 });
+/**
+ * POST /api/deliveries/:id/cancel
+ * Header: Authorization: Bearer <accessToken>
+ * Customer cancels her own pending, unpaid order (soft delete).
+ */
+router.post('/:id/cancel', verifyToken, requireRole(['customer']), async (req, res) => {
+    try {
+        res.json(await deliveriesSer.cancelDelivery(req.user.id, Number(req.params.id)));
+    } catch (err) {
+        if (err.message.includes('not found')) {
+            return res.status(404).json({ error: err.message });
+        }
+        if (err.message.includes('cancel') || err.message.includes('taken')) {
+            return res.status(400).json({ error: err.message });
+        }
+        logger.error('Cancel error:', err.message);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+});
 
 module.exports = router;

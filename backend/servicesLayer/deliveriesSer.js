@@ -243,8 +243,44 @@ async function getMyDeliveryById(customerId, deliveryId) {
   d.history = await deliveryStatusHistoryDat.getHistoryByDelivery(deliveryId);
   return d;
 }
+/**
+ * Business rules: customer cancels an order (soft delete: status, not removed)
+ * 1. Only her own order
+ * 2. Only while pending (no courier yet)
+ * 3. Paid orders cannot be cancelled
+ * 4. Every change writes a history row
+ */
+async function cancelDelivery(customerId, deliveryId) {
+  const d = await deliveriesDat.getDeliveryDetail(deliveryId);
+
+  if (!d || d.customer_id !== customerId) {
+    throw new Error('Delivery not found');
+  }
+  if (d.status !== 'pending') {
+    throw new Error('Only pending orders can be cancelled');
+  }
+  if (d.payment_status === 'paid') {
+    throw new Error('Paid orders cannot be cancelled');
+  }
+
+  // only if still pending (a courier may accept at the same moment)
+  const changed = await deliveriesDat.updateStatus(deliveryId, 'pending', 'cancelled', null);
+  if (changed === 0) {
+    throw new Error('Order was just taken by a courier');
+  }
+
+  await deliveryStatusHistoryDat.addStatus({
+    deliveryId,
+    oldStatus: 'pending',
+    newStatus: 'cancelled',
+    changedBy: customerId,
+    note: 'Cancelled by customer',
+  });
+
+  return { message: 'Order cancelled', deliveryId };
+}
 
 module.exports = {
   validateBooking, applyOptions, priceBooking, makeTrackingNo, makeDeadline,
-  createDelivery, getMyDeliveries, getMyDeliveryById, FOUR_HOUR_TYPE_IDS
+  createDelivery, getMyDeliveries, getMyDeliveryById, FOUR_HOUR_TYPE_IDS, cancelDelivery
 };
