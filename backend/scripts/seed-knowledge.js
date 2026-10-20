@@ -1,7 +1,7 @@
 require('dotenv').config();
-const aiSer = require('./servicesLayer/aiSer');
-const knowledgeDat = require('./dataLayer/knowledgeDat');
-const helpTexts = require('./knowledge/helpTexts');
+const aiSer = require('../servicesLayer/aiSer');
+const knowledgeDat = require('../dataLayer/knowledgeDat');
+const helpTexts = require('../knowledge/helpTexts');
 
 // run once (and again whenever helpTexts.js changes)
 (async () => {

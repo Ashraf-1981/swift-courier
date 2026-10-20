@@ -164,7 +164,7 @@ Set in Render (and in `backend/.env` locally, which is not committed):
 `PORT` is set by Render automatically.
 
 ### Steps
-1. **Database:** create a free MySQL service on Aiven. Export the local database (`mysqldump`) and import it with `backend/import-aiven.js` (local MariaDB → MySQL needed small fixes: MariaDB-only lines, foreign key names, collation).
+1. **Database:** create a free MySQL service on Aiven. Export the local database (`mysqldump`) and import it with `backend/scripts/import-aiven.js` (local MariaDB → MySQL needed small fixes: MariaDB-only lines, foreign key names, collation).
 2. **App:** on Render, create a Web Service from this GitHub repo:
    - Build: `cd frontend && npm install && npm run build && cd ../backend && npm install`
    - Start: `cd backend && node index.js`
@@ -175,7 +175,7 @@ Set in Render (and in `backend/.env` locally, which is not committed):
 cd backend && npm install && npm run dev      # http://localhost:3000
 cd frontend && npm install && npm run dev     # http://localhost:5173
 ```
-Run the SQL files in `backend/sql/` in order, then `node seed-knowledge.js` once for the AI help texts.
+Run the SQL files in `backend/sql/` in order, then `node scripts/seed-knowledge.js` once for the AI help texts.
 
 
 ## 8. Credits
