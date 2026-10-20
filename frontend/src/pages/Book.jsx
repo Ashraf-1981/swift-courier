@@ -4,6 +4,7 @@ import { API_URL } from '../api';
 import api from '../apiClient';
 import { useAtomValue } from 'jotai';
 import { authAtom } from '../atoms/authAtom';
+import ZoneSelect from '../components/ZoneSelect';
 
 function Book() {
     // lists from the backend
@@ -94,9 +95,6 @@ function Book() {
         getQuote();
     }, [deliveryTypeId, pickupZoneId, dropoffZoneId, weightKg, lengthCm, widthCm, heightCm, extraStops, scheduledPickupAt, collectBack]);
 
-    // the zones users picked (to show their warning notes)
-    const pickupZone = zones.find((z) => z.id === Number(pickupZoneId));
-    const dropoffZone = zones.find((z) => z.id === Number(dropoffZoneId));
     // the vehicle user picked (to show its limits)
     const selectedType = types.find((t) => t.id === deliveryTypeId);
 
@@ -176,27 +174,8 @@ function Book() {
             {/* 2. Areas */}
             <h5>2. Pickup and drop-off area</h5>
             <div className="row g-3 mb-4">
-                <div className="col-md-6">
-                    <label className="form-label">Pickup area</label>
-                    <select className="form-select" value={pickupZoneId} onChange={(e) => setPickupZoneId(e.target.value)}>
-                        <option value="">Choose...</option>
-                        {zones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
-                    </select>
-                    {pickupZone && pickupZone.restricted_note && (
-                        <small className="text-danger">⚠ {pickupZone.restricted_note}</small>
-                    )}
-                </div>
-
-                <div className="col-md-6">
-                    <label className="form-label">Drop-off area</label>
-                    <select className="form-select" value={dropoffZoneId} onChange={(e) => setDropoffZoneId(e.target.value)}>
-                        <option value="">Choose...</option>
-                        {zones.map((z) => <option key={z.id} value={z.id}>{z.name}</option>)}
-                    </select>
-                    {dropoffZone && dropoffZone.restricted_note && (
-                        <small className="text-danger">⚠ {dropoffZone.restricted_note}</small>
-                    )}
-                </div>
+                <ZoneSelect label="Pickup area" zones={zones} value={pickupZoneId} onChange={setPickupZoneId} />
+                <ZoneSelect label="Drop-off area" zones={zones} value={dropoffZoneId} onChange={setDropoffZoneId} />
             </div>
 
             {/* 3. Addresses and contacts */}
