@@ -1,6 +1,7 @@
 /* very light page background, so the hero band stands out */
 body {
-    background-color: #f4f7fb;
+    background-color: #d2ddec;
+    ;
 }
 
 /* Dark blue to light blue, warm orange corner */
@@ -13,10 +14,12 @@ body {
     background-color: #ff6b00;
     color: white;
 }
+
 .btn-orange:hover {
     background-color: #e55f00;
     color: white;
 }
+
 /* navbar: a bit lighter than the dark footer, blue-grey to match the hero */
 .navbar-slate {
     background-color: #3d4a5c;

@@ -43,43 +43,39 @@ function Login() {
             setLoading(false);
         }
     }
-
     return (
-        <div className="container-fluid px-4 py-5" style={{ maxWidth: 420 }}>
-            <h2 className="mb-4">Log in</h2>
+        <div className="d-flex justify-content-center align-items-center flex-grow-1 px-3 py-5">
+            <div className="card shadow-sm p-4 w-100" style={{ maxWidth: 400 }}>
+                <h1 className="h4 mb-3 text-center">Log in</h1>
 
-            {error && <div className="alert alert-danger">{error}</div>}
-            {message && <div className="alert alert-success">{message}</div>}
+                {error && <div className="alert alert-danger">{error}</div>}
+                {message && <div className="alert alert-success">{message}</div>}
 
-            <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                    <label className="form-label">Email</label>
+                <form onSubmit={handleSubmit}>
                     <input
                         type="email"
-                        className="form-control"
+                        className="form-control mb-2"
+                        placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
-                </div>
-
-                <div className="mb-3">
-                    <label className="form-label">Password</label>
                     <input
                         type="password"
-                        className="form-control"
+                        className="form-control mb-3"
+                        placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                </div>
-
-                <button className="btn btn-primary w-100" disabled={loading}>
-                    {loading ? 'Logging in...' : 'Log in'}
-                </button>
-            </form>
+                    <button className="btn btn-dark w-100" disabled={loading}>
+                        {loading ? 'Logging in...' : 'Log in'}
+                    </button>
+                </form>
+            </div>
         </div>
     );
+
 }
 
 export default Login;

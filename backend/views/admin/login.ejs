@@ -8,20 +8,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
-<body class="p-4" style="max-width: 400px">
-  <h1 class="h3 mb-3">Admin login</h1>
+<body style="background-color: #d2ddec">
+  <div class="d-flex justify-content-center align-items-center min-vh-100 px-3">
+    <div class="card shadow-sm p-4 w-100" style="max-width: 400px">
+      <h1 class="h4 mb-3 text-center">Swift-Courier Admin</h1>
 
-  <% if (error) { %>
-    <div class="alert alert-danger">
-      <%= error %>
+      <% if (error) { %>
+        <div class="alert alert-danger">
+          <%= error %>
+        </div>
+        <% } %>
+
+          <form method="POST" action="/admin/login">
+            <input class="form-control mb-2" type="email" name="email" placeholder="Email" required>
+            <input class="form-control mb-3" type="password" name="password" placeholder="Password" required>
+            <button class="btn btn-dark w-100">Log in</button>
+          </form>
     </div>
-    <% } %>
-
-      <form method="POST" action="/admin/login">
-        <input class="form-control mb-2" type="email" name="email" placeholder="Email" required>
-        <input class="form-control mb-3" type="password" name="password" placeholder="Password" required>
-        <button class="btn btn-dark w-100">Log in</button>
-      </form>
+  </div>
 </body>
 
 </html>
