@@ -23,8 +23,8 @@ function Navbar() {
     }
 
     return (
-        <nav className="navbar navbar-expand-md navbar-dark bg-dark px-4">
-            <Link to="/" className="navbar-brand" onClick={() => setOpen(false)}>Swift-Courier</Link>
+        <nav className="navbar navbar-expand-md navbar-dark navbar-slate shadow-sm px-4">
+            <Link to="/" className="navbar-brand fw-bold" onClick={() => setOpen(false)}>Swift-Courier</Link>
             <button className="navbar-toggler" type="button" onClick={() => setOpen(!open)}>
                 <span className="navbar-toggler-icon"></span>
             </button>

@@ -39,7 +39,7 @@ const USERS = [
             id = result.insertId;
             console.log('Created:', u.email);
         } else {
-            await db.query('UPDATE users SET password_hash = ? WHERE id = ?', [hash, id]);
+            await db.query('UPDATE users SET password_hash = ?, role = ? WHERE id = ?', [hash, u.role, id]);
             console.log('Exists, password reset:', u.email);
         }
 

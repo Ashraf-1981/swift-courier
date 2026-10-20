@@ -1,0 +1,23 @@
+/* very light page background, so the hero band stands out */
+body {
+    background-color: #f4f7fb;
+}
+
+/* Dark blue to light blue, warm orange corner */
+.hero {
+    background: linear-gradient(120deg, #0b3d91 0%, #1565c0 45%, #42a5f5 85%, #ffb27a 100%);
+}
+
+/* orange buttons, same colour as Ask Swift */
+.btn-orange {
+    background-color: #ff6b00;
+    color: white;
+}
+.btn-orange:hover {
+    background-color: #e55f00;
+    color: white;
+}
+/* navbar: a bit lighter than the dark footer, blue-grey to match the hero */
+.navbar-slate {
+    background-color: #3d4a5c;
+}
