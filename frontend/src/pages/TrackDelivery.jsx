@@ -87,11 +87,13 @@ function TrackDelivery() {
                         <p className="mb-0">Payment: <span className="badge bg-success">Paid</span></p>
                     ) : (
                         <>
-                            <p className="mb-2">Payment: <span className="badge bg-danger">Unpaid</span></p>
                             {payError && <div className="alert alert-danger py-2">{payError}</div>}
-                            <button className="btn btn-primary" onClick={handlePay} disabled={paying}>
-                                {paying ? 'Paying...' : `Pay $${d.total_fee}`}
-                            </button>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <p className="mb-0">Payment: <span className="badge bg-danger">Unpaid</span></p>
+                                <button className="btn btn-primary" onClick={handlePay} disabled={paying}>
+                                    {paying ? 'Paying...' : `Pay $${d.total_fee}`}
+                                </button>
+                            </div>
                         </>
                     )}
                 </div>

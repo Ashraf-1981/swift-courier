@@ -45,50 +45,62 @@ function Home() {
     }));
 
     return (
-        <div className="container-fluid px-3 px-md-5 py-5">
-            <h1 className="text-primary">Deliver anything, anywhere in Singapore</h1>
-            <p className="lead">Fast deliveries across Singapore.</p>
-            <Link to="/book" className="btn btn-primary mb-5">Book a delivery</Link>
-
-            <h3 className="mb-3">Our vehicles</h3>
-            <div className="row g-3">
-                {types.length > 0 && vehicles.map((v) => (
-                    <div className="col-12 col-md-4" key={v.name}>
-                        <div className="text-center" style={{ cursor: 'pointer' }} onClick={() => setSelected(v)}>
-                            <img src={`/vehicles/${v.name.toLowerCase()}.jpg`} alt={v.name}
-                                className="img-fluid"
-                                style={{ height: 140, objectFit: 'contain', mixBlendMode: 'multiply' }} />
-                            <h6 className="mt-2">{v.name}</h6>
-                        </div>
+        <>
+            <div className="hero text-white px-3 px-md-5 py-5">
+                <div className="row align-items-center g-4">
+                    <div className="col-12 col-md-6">
+                        <h1 className="fw-bold">Deliver anything, anywhere in Singapore</h1>
+                        <p className="lead">Fast deliveries across Singapore.</p>
+                        <Link to="/book" className="btn btn-orange btn-lg">Book a delivery</Link>
                     </div>
-                ))}
+                    <div className="col-12 col-md-6 text-center">
+                        <img src="/hero.jpg" alt="Courier delivering parcels"
+                            className="img-fluid rounded-4 shadow" style={{ maxHeight: 320 }} />
+                    </div>
+                </div>
             </div>
-            {selected && (
-                <>
-                    <div className="modal d-block" tabIndex="-1" onClick={() => setSelected(null)}>
-                        <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
-                            onClick={(e) => e.stopPropagation()}>
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">{selected.name}</h5>
-                                    <button type="button" className="btn-close" onClick={() => setSelected(null)}></button>
-                                </div>
-                                <div className="modal-body">
-                                    <div className="row">
-                                        <ServiceDetails title="Standard" service={selected.standard} />
-                                        <ServiceDetails title="4-Hour Express" service={selected.express} />
+
+            <div className="container-fluid px-3 px-md-5 py-5 flex-grow-1 d-flex flex-column justify-content-center">
+                <h3 className="mb-3 text-center">Our vehicles</h3>
+                <div className="row g-3">
+                    {types.length > 0 && vehicles.map((v) => (
+                        <div className="col-12 col-md-4" key={v.name}>
+                            <div className="text-center" style={{ cursor: 'pointer' }} onClick={() => setSelected(v)}>
+                                <img src={`/vehicles/${v.name.toLowerCase()}.jpg`} alt={v.name}
+                                    className="img-fluid"
+                                    style={{ height: 140, objectFit: 'contain', mixBlendMode: 'multiply' }} />
+                                <h6 className="mt-2">{v.name}</h6>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                {selected && (
+                    <>
+                        <div className="modal d-block" tabIndex="-1" onClick={() => setSelected(null)}>
+                            <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
+                                onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-content">
+                                    <div className="modal-header">
+                                        <h5 className="modal-title">{selected.name}</h5>
+                                        <button type="button" className="btn-close" onClick={() => setSelected(null)}></button>
                                     </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <Link to="/book" className="btn btn-primary">Book a {selected.name}</Link>
+                                    <div className="modal-body">
+                                        <div className="row">
+                                            <ServiceDetails title="Standard" service={selected.standard} />
+                                            <ServiceDetails title="4-Hour Express" service={selected.express} />
+                                        </div>
+                                    </div>
+                                    <div className="modal-footer">
+                                        <Link to="/book" className="btn btn-primary">Book a {selected.name}</Link>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="modal-backdrop show"></div>
-                </>
-            )}
-        </div>
+                        <div className="modal-backdrop show"></div>
+                    </>
+                )}
+            </div>
+        </>
     );
 }
 
