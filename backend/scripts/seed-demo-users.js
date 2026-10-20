@@ -1,6 +1,6 @@
 require('dotenv').config();
 const bcrypt = require('bcrypt');
-const db = require('./db');
+const db = require('../db');
 
 // demo accounts for the assessors; password comes from .env, never from git
 const PASSWORD = process.env.DEMO_PASSWORD;

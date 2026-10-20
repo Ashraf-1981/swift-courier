@@ -1,4 +1,4 @@
-const blacklistDat = require('./dataLayer/blacklistDat');
+const blacklistDat = require('../../dataLayer/blacklistDat');
 
 (async () => {
   const id = await blacklistDat.addToken({

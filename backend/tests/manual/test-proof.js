@@ -1,4 +1,4 @@
-const proofDat = require('./dataLayer/proofOfDeliveryDat');
+const proofDat = require('../../dataLayer/proofOfDeliveryDat');
 
 (async () => {
   const id = await proofDat.addProof({

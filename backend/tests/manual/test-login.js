@@ -1,4 +1,4 @@
-const authSer = require('./servicesLayer/authSer');
+const authSer = require('../../servicesLayer/authSer');
 
 (async () => {
   // correct password

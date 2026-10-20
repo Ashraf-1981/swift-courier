@@ -1,5 +1,5 @@
-const authSer = require('./servicesLayer/authSer');
-const blacklistDat = require('./dataLayer/blacklistDat');
+const authSer = require('../../servicesLayer/authSer');
+const blacklistDat = require('../../dataLayer/blacklistDat');
 
 (async () => {
   const { refreshToken } = await authSer.login({ email: 'ali@swift.com', password: 'password123' });

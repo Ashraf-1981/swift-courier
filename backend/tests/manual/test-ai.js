@@ -1,7 +1,7 @@
 // As a start
 
 // require('dotenv').config();
-// const aiSer = require('./servicesLayer/aiSer');
+// const aiSer = require('../../servicesLayer/aiSer');
 
 // (async () => {
 //   try {
@@ -17,7 +17,7 @@
 // })();
 
 require('dotenv').config();
-const aiSer = require('./servicesLayer/aiSer');
+const aiSer = require('../../servicesLayer/aiSer');
 
 (async () => {
   try {

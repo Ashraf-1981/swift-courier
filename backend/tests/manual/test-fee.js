@@ -1,4 +1,4 @@
-// const feeSer = require('./servicesLayer/feeSer');
+// const feeSer = require('../../servicesLayer/feeSer');
 
 // (async () => {
 //   // Delivery type, Pickup zone, Drop-off zone, 1 extra stop
@@ -9,7 +9,7 @@
 
 
 // This test with the collection back the item
-const feeSer = require('./servicesLayer/feeSer');
+const feeSer = require('../../servicesLayer/feeSer');
 
 (async () => {
   const carNo = await feeSer.calculateTotalFee({

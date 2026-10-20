@@ -1,6 +1,6 @@
 // These test with weight
 
-// const vehicleSer = require('./servicesLayer/vehicleSer');
+// const vehicleSer = require('../../servicesLayer/vehicleSer');
 
 // (async () => {
 //   // Bike, small parcel → fits
@@ -26,7 +26,7 @@
 
 
 // These test with size
-const vehicleSer = require('./servicesLayer/vehicleSer');
+const vehicleSer = require('../../servicesLayer/vehicleSer');
 
 (async () => {
   // Bike, 40×30×30 → exactly at Bike's limit → stays Bike

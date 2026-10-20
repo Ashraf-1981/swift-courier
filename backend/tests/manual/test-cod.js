@@ -1,4 +1,4 @@
-const paymentsDat = require('./dataLayer/deliveryPaymentsDat');
+const paymentsDat = require('../../dataLayer/deliveryPaymentsDat');
 
 (async () => {
   console.log('Before:', await paymentsDat.getPaymentByDeliveryId(5));

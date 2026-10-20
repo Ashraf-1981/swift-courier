@@ -1,6 +1,6 @@
-const pool = require('./db');
-const deliveriesDat = require('./dataLayer/deliveriesDat');
-const deliveryPaymentsDat = require('./dataLayer/deliveryPaymentsDat');
+const pool = require('../../db');
+const deliveriesDat = require('../../dataLayer/deliveriesDat');
+const deliveryPaymentsDat = require('../../dataLayer/deliveryPaymentsDat');
 
 (async () => {
   const deliveryId = await deliveriesDat.createDelivery({

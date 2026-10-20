@@ -1,4 +1,4 @@
-const dat = require('./dataLayer/deliveryTypesDat');
+const dat = require('../../dataLayer/deliveryTypesDat');
 
 (async () => {
   console.log(await dat.getAllDeliveryTypes());

@@ -1,4 +1,4 @@
-const couriersSer = require('./servicesLayer/couriersSer');
+const couriersSer = require('../../servicesLayer/couriersSer');
 const img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
 
 (async () => {
