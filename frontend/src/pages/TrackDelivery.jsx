@@ -10,6 +10,7 @@ function TrackDelivery() {
     const [error, setError] = useState('');
     const [paying, setPaying] = useState(false);
     const [payError, setPayError] = useState('');
+    const [cancelError, setCancelError] = useState('');
 
     useEffect(() => {
         async function load() {
@@ -39,6 +40,19 @@ function TrackDelivery() {
             setPayError(err.response ? err.response.data.error : 'Cannot reach the server');
         } finally {
             setPaying(false);
+        }
+    }
+
+    // soft delete: status becomes cancelled, the order stays in the history
+    async function handleCancel() {
+        if (!window.confirm('Cancel this order?')) return;
+        setCancelError('');
+        try {
+            await api.post(`/deliveries/${id}/cancel`);
+            const res = await api.get(`/deliveries/${id}`); // reload to show the new timeline row
+            setD(res.data);
+        } catch (err) {
+            setCancelError(err.response ? err.response.data.error : 'Cannot reach the server');
         }
     }
 
@@ -135,6 +149,16 @@ function TrackDelivery() {
                     </ul>
                 </div>
             </div>
+
+            {/* Cancel: only while pending and not paid */}
+            {d.status === 'pending' && d.payment_status !== 'paid' && (
+                <div className="text-end">
+                    {cancelError && <div className="alert alert-danger py-2 text-start">{cancelError}</div>}
+                    <button className="btn btn-outline-danger" onClick={handleCancel}>
+                        Cancel order
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

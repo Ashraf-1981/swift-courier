@@ -69,7 +69,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 ## 3. Features
 ### Major features
 - **Booking:** live price, auto vehicle upgrade, extra stops, doorstep / collect-back options, PayNow / card / COD (simulated payment).
-- **Tracking:** My Deliveries with status filter, delivery detail with status history.
+- **Tracking:** My Deliveries with status filter, delivery detail with status history; customer can cancel an order while it is pending and unpaid (soft delete: status Cancelled, kept in history).
 - **Courier:** available jobs, accept (first wins), status buttons, photo or signature proof, failed / returned flow.
 - **Admin (EJS):** warehouse hand-out, orders with filters (status, payment, zone, date range) + mark paid, users list. Admins can only log in at `/admin/login`.
 - **AI:** Ask Swift (RAG) for customers; plain-English order search for admin. If Gemini is busy, a lighter backup model answers.
@@ -99,6 +99,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 | Hand out warehouse parcel | Admin sends parcel to drop-off courier | /admin → Warehouse → pick courier → Hand out |
 | Find an order | Admin answers a customer call | /admin → Orders → type "unpaid orders to Orchard" → AI search (or use filters) |
 | Ask a question | Customer gets help without calling | Click Ask Swift → type question → answer from our rules and own deliveries |
+| Cancel an order | Customer changes their mind before pickup | My deliveries → open a pending, unpaid order → Cancel order → OK → status Cancelled |
 
 
 ## 5. Technologies Used
@@ -115,7 +116,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 
 ## 6. Testing
 ### Automated unit tests (Jest)
-56 tests in `backend/tests/` cover the business rules: courier status flow, admin filters, fees and ERP, booking rules, vehicle upgrade, auth, delivery proof and the RAG helper. Database and Gemini are mocked, so tests run offline in about 3 seconds.
+61 tests in `backend/tests/` cover the business rules: courier status flow, admin filters, fees and ERP, booking and cancel rules, vehicle upgrade, auth, delivery proof and the RAG helper. Database and Gemini are mocked, so tests run offline in about 3 seconds.
 
 ```bash
 cd backend
@@ -140,6 +141,7 @@ npm run coverage    # tests + coverage report
 | 10 | Rate limit | 11 wrong logins in a row | 11th returns 429 "Too many login attempts" | Pass |
 | 11 | Gemini down | Wi-Fi off, ask Ask Swift | Friendly error; reason in `logs/app.log` | Pass |
 | 12 | Wrong role | Customer opens `/courier/jobs` | Sent back to Home | Pass |
+| 13 | Cancel order | Open a pending COD order → Cancel order → OK | Status Cancelled, timeline "Cancelled by customer", button gone; paid orders show no Cancel | Pass |
 
 
 ## 7. Deployment
