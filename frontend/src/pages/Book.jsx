@@ -14,7 +14,6 @@ function Book() {
     const [zones, setZones] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-
     // the user's selections
     const [deliveryTypeId, setDeliveryTypeId] = useState(null);
     const [pickupZoneId, setPickupZoneId] = useState('');

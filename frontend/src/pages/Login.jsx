@@ -24,6 +24,11 @@ function Login() {
         try {
             const res = await axios.post(`${API_URL}/auth/login`, { email, password });
 
+            // admin has its own dashboard (EJS), not this site
+            if (res.data.user.role === 'admin') {
+                setError('Admins log in at /admin/login');
+                return;
+            }
             setAuth(res.data);   // save tokens + user in the atom
             // courier → jobs page, others → Home
             navigate(res.data.user.role === 'courier' ? '/courier/jobs' : '/');
