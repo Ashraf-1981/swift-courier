@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 
 // receiver signs with finger or mouse; onSave gets a PNG as base64 text
 function SignaturePad({ onSave }) {
@@ -10,6 +10,15 @@ function SignaturePad({ onSave }) {
         const rect = canvasRef.current.getBoundingClientRect();
         return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
+    // real white pixels, so the saved PNG is not transparent (dark in viewers)
+    function fillWhite() {
+        const c = canvasRef.current;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, c.width, c.height);
+    }
+
+    useEffect(fillWhite, []); // once, when the pad first shows
 
     function start(e) {
         drawing.current = true;
@@ -31,10 +40,8 @@ function SignaturePad({ onSave }) {
     function stop() {
         drawing.current = false;
     }
-
     function clear() {
-        const c = canvasRef.current;
-        c.getContext('2d').clearRect(0, 0, c.width, c.height);
+        fillWhite();
     }
 
     return (
