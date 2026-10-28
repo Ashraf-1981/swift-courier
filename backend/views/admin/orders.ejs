@@ -116,7 +116,8 @@
                                     </td>
                                     <td>
                                         <%= o.pay_method %> · <%= o.pay_status %>
-                                                <% if (o.pay_status==='unpaid' && o.pay_method !=='cod' ) { %>
+                                                <% if (o.pay_status==='unpaid' && o.pay_method !=='cod' && o.status
+                                                    !=='cancelled' ) { %>
                                                     <form method="POST" action="/admin/orders/<%= o.id %>/paid"
                                                         class="d-inline ms-3">
                                                         <button class="btn btn-success btn-sm">Mark paid</button>

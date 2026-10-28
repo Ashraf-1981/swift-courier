@@ -104,7 +104,7 @@ function TrackDelivery() {
                             {payError && <div className="alert alert-danger py-2">{payError}</div>}
                             <div className="d-flex justify-content-between align-items-center">
                                 <p className="mb-0">Payment: <span className="badge bg-danger">Unpaid</span></p>
-                                <button className="btn btn-primary" onClick={handlePay} disabled={paying}>
+                                <button className="btn btn-primary" onClick={handlePay} disabled={paying || d.status === 'cancelled'}>
                                     {paying ? 'Paying...' : `Pay $${d.total_fee}`}
                                 </button>
                             </div>
