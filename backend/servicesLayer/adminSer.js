@@ -82,6 +82,9 @@ async function markOrderPaid(deliveryId) {
     if (!payment) throw new Error('Payment not found');
     if (payment.method === 'cod') throw new Error('COD is collected by the courier');
 
+    const delivery = await deliveriesDat.getDeliveryById(deliveryId);
+    if (delivery.status === 'cancelled') throw new Error('Order is cancelled');
+
     const changed = await deliveryPaymentsDat.markPaid(deliveryId);
     if (changed === 0) throw new Error('Order is already paid');
 

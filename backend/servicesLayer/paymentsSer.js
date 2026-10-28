@@ -16,6 +16,10 @@ async function payDelivery(customerId, deliveryId) {
   if (d.payment_method === 'cod') {
     throw new Error('Cash on delivery is paid to the courier');
   }
+  /* 4. Can't pay a cancelled order*/
+  if (d.status === 'cancelled') {
+    throw new Error('This order is cancelled');
+  }
   if (d.payment_status === 'paid') {
     throw new Error('This delivery is already paid');
   }
