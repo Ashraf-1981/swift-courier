@@ -148,7 +148,7 @@ function CourierJobs() {
                             <>
                                 <p className="mb-1">Receiver signs here:</p>
                                 <SignaturePad onSave={(img) => sendProof('signature_digital', img)} />
-                                    {/*Or sign on Paper on some cases */}
+                                {/*Or sign on Paper on some cases */}
                                 <p className="small text-muted mt-3 mb-1">Or upload a photo of the signed paper:</p>
                             </>
                         )}
@@ -176,6 +176,7 @@ function CourierJobs() {
                                 <th>Drop-off</th>
                                 <th>Vehicle</th>
                                 <th>Pickup time</th>
+                                <th>Notes</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -187,6 +188,12 @@ function CourierJobs() {
                                     <td>{j.dropoff_zone}</td>
                                     <td>{j.vehicle}</td>
                                     <td>{formatTime(j.scheduled_pickup_at)}</td>
+                                    <td style={{ whiteSpace: 'normal', minWidth: '180px' }}>
+                                        <span className={`badge ${j.allow_doorstep ? 'bg-success' : 'bg-secondary'}`}>
+                                            {j.allow_doorstep ? 'Doorstep OK' : 'Signature needed'}
+                                        </span>
+                                        {j.instructions && <div className="small text-muted mt-1">{j.instructions}</div>}
+                                    </td>
                                     <td>
                                         <button className="btn btn-primary btn-sm" onClick={() => handleAccept(j.id)}>
                                             Accept

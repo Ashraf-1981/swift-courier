@@ -57,8 +57,9 @@ async function getDeliveryDetail(id) {
 // every job no courier holds right now (waiting for pickup, or waiting at the warehouse)
 async function getOpenJobs() {
   const [rows] = await pool.query(
-    `SELECT d.id, d.tracking_no, d.status, d.delivery_type_id,
+    `SELECT d.id, d.tracking_no, d.status, d.delivery_type_id,d.instructions, d.allow_doorstep,
             d.pickup_zone_id, d.dropoff_zone_id, d.scheduled_pickup_at,
+            d.instructions, d.allow_doorstep,
             t.name AS vehicle,
             pz.name AS pickup_zone, dz.name AS dropoff_zone,
             p.method AS payment_method, p.status AS payment_status
@@ -125,7 +126,8 @@ async function getOrders(filters) {
   const whereSql = where.length ? 'WHERE ' + where.join(' AND ') : '';
 
   const [rows] = await pool.query(
-    `SELECT d.id, d.tracking_no, d.status, d.total_fee, d.created_at,
+    `SELECT d.id, d.tracking_no, d.status, d.total_fee, d.created_at, d.instructions,
+            d.allow_doorstep, d.collect_back, d.collect_back_note,
             u.name AS customer, pz.name AS pickup_zone, dz.name AS dropoff_zone,
             p.method AS pay_method, p.status AS pay_status
      FROM deliveries d
@@ -143,7 +145,7 @@ async function getOrders(filters) {
 async function getJobsInHand(courierId) {
   const [rows] = await pool.query(
     `SELECT d.id, d.tracking_no, d.status, d.delivery_type_id,
-            d.pickup_zone_id, d.dropoff_zone_id, d.allow_doorstep,
+            d.pickup_zone_id, d.dropoff_zone_id, d.allow_doorstep, d.instructions,
             d.pickup_address, d.dropoff_address,
             d.dropoff_contact_name, d.dropoff_contact_phone,
             pz.name AS pickup_zone, dz.name AS dropoff_zone,
