@@ -94,6 +94,13 @@ function TrackDelivery() {
                 <div className="card-body">
                     <p className="mb-1">Vehicle: {d.vehicle}</p>
                     <p className="mb-1">Pickup time: {formatTime(d.scheduled_pickup_at)}</p>
+                    {(d.allow_doorstep || d.instructions || d.collect_back) && (
+                        <p className="mb-1">Remarks: {[
+                            d.allow_doorstep && 'Doorstep OK',
+                            d.instructions,
+                            d.collect_back && `Collect back${d.collect_back_note ? ': ' + d.collect_back_note : ''}`,
+                        ].filter(Boolean).join(' · ')}</p>
+                    )}
                     <p className="mb-1">Total: ${d.total_fee}</p>
                     {d.payment_method === 'cod' ? (
                         <p className="mb-0">Payment: Cash on delivery (receiver pays the courier)</p>

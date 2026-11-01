@@ -98,9 +98,11 @@
                                 <th>Fee</th>
                                 <th>Payment</th>
                                 <th>Created</th>
+                                <th>Remarks</th>
                             </tr>
                             <% orders.forEach((o)=> { %>
                                 <tr class="<%= o.pay_status === 'paid' ? 'row-paid' : '' %>">
+
                                     <td>
                                         <%= o.tracking_no %>
                                     </td>
@@ -132,6 +134,21 @@
                                     </td>
                                     <td>
                                         <%= new Date(o.created_at).toLocaleDateString() %>
+                                    </td>
+                                    <td class="small" style="white-space: normal; min-width: 200px;">
+                                        <% if (o.allow_doorstep) { %>
+                                            <div>Doorstep OK</div>
+                                            <% } %>
+                                                <% if (o.instructions) { %>
+                                                    <div>
+                                                        <%= o.instructions %>
+                                                    </div>
+                                                    <% } %>
+                                                        <% if (o.collect_back) { %>
+                                                            <div>Collect back<%= o.collect_back_note ? ': ' +
+                                                                    o.collect_back_note : '' %>
+                                                            </div>
+                                                            <% } %>
                                     </td>
                                 </tr>
                                 <% }) %>
