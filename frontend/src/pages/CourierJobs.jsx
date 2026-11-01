@@ -3,6 +3,20 @@ import api from '../apiClient';
 import { STATUS, formatTime } from '../utils/deliveryStatus';
 import SignaturePad from '../components/SignaturePad';
 
+// customer's remarks for the courier, shown before and after accepting
+function Remarks({ j }) {
+    return (
+        <td style={{ whiteSpace: 'normal', minWidth: '180px' }}>
+            <span className={`badge ${j.allow_doorstep ? 'bg-success' : 'bg-secondary'}`}>
+                {j.allow_doorstep ? 'Doorstep OK' : 'Signature needed'}
+            </span>
+            {j.payment_method === 'cod' && <div className="small text-danger mt-1">COD: collect cash</div>}
+            {!!j.collect_back && <div className="small mt-1">Collect back{j.collect_back_note ? ': ' + j.collect_back_note : ''}</div>}
+            {j.instructions && <div className="small text-muted mt-1">{j.instructions}</div>}
+        </td>
+    );
+}
+
 function CourierJobs() {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -101,6 +115,7 @@ function CourierJobs() {
                                 <th>Drop-off address</th>
                                 <th>Receiver</th>
                                 <th>Payment</th>
+                                <th>Notes</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -113,7 +128,8 @@ function CourierJobs() {
                                     <td>{j.dropoff_address}</td>
                                     <td>{j.dropoff_contact_name} · {j.dropoff_contact_phone}</td>
                                     <td>{j.payment_method === 'cod' ? `Collect $${j.total_fee}` : 'Paid'}</td>
-                                    <td className="d-flex gap-2">
+                                    <Remarks j={j} />
+                                    <td><div className="d-flex gap-2">
                                         {j.status === 'out_for_delivery' && (
                                             <button className="btn btn-success btn-sm" onClick={() => setProofJob(j)}>
                                                 Delivered
@@ -128,7 +144,7 @@ function CourierJobs() {
                                                 {STATUS[s].label}
                                             </button>
                                         ))}
-                                    </td>
+                                    </div></td>
                                 </tr>
                             ))}
                         </tbody>
@@ -188,12 +204,7 @@ function CourierJobs() {
                                     <td>{j.dropoff_zone}</td>
                                     <td>{j.vehicle}</td>
                                     <td>{formatTime(j.scheduled_pickup_at)}</td>
-                                    <td style={{ whiteSpace: 'normal', minWidth: '180px' }}>
-                                        <span className={`badge ${j.allow_doorstep ? 'bg-success' : 'bg-secondary'}`}>
-                                            {j.allow_doorstep ? 'Doorstep OK' : 'Signature needed'}
-                                        </span>
-                                        {j.instructions && <div className="small text-muted mt-1">{j.instructions}</div>}
-                                    </td>
+                                    <Remarks j={j} />
                                     <td>
                                         <button className="btn btn-primary btn-sm" onClick={() => handleAccept(j.id)}>
                                             Accept
