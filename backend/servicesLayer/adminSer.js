@@ -126,5 +126,25 @@ async function getUsers(query) {
     const users = await usersDat.getUsers(filters);
     return { users, filters, roles: ROLES };
 }
+/**
+ * Business rules: admin removes a zone from a courier
+ * 1. User must be a courier
+ * 2. Courier must have that zone, otherwise nothing to remove
+ */
+async function removeCourierZone(courierId, zoneId) {
+    // rule 1: getCourierById only finds role 'courier'
+    const courier = await couriersDat.getCourierById(courierId);
+    if (!courier) {
+        throw new Error('Courier not found');
+    }
 
-module.exports = { getWarehouseParcels, assignParcel, getOrders, markOrderPaid, searchOrdersByText, getUsers };
+    // rule 2
+    const removed = await couriersDat.removeCourierZone(courierId, zoneId);
+    if (removed === 0) {
+        throw new Error('Courier does not cover this zone');
+    }
+
+    return { message: 'Zone removed', courierId, zoneId };
+}
+
+module.exports = { getWarehouseParcels, assignParcel, getOrders, markOrderPaid, searchOrdersByText, getUsers, removeCourierZone };

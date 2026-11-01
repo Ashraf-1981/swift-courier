@@ -39,6 +39,9 @@ async function getUsers({ role, search }) {
             (SELECT GROUP_CONCAT(z.name ORDER BY z.name SEPARATOR ', ')
                FROM courier_zones cz JOIN zones z ON z.id = cz.zone_id
               WHERE cz.courier_id = u.id) AS zones,
+            (SELECT GROUP_CONCAT(z.id ORDER BY z.name)
+               FROM courier_zones cz JOIN zones z ON z.id = cz.zone_id
+              WHERE cz.courier_id = u.id) AS zone_ids,
             (SELECT COUNT(*) FROM deliveries d WHERE d.customer_id = u.id) AS order_count
      FROM users u
      ${whereSql}

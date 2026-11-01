@@ -92,7 +92,30 @@ router.get('/orders', requireAdminSession, async (req, res) => {
 // GET /admin/users → all users, ?role= and ?search= filter the list
 router.get('/users', requireAdminSession, async (req, res) => {
     const data = await adminSer.getUsers(req.query);
-    res.render('admin/users', { admin: req.session.admin, ...data });
+    res.render('admin/users', {
+        admin: req.session.admin,
+        ...data,
+        msg: req.query.msg,
+        error: req.query.error,
+    });
+});
+
+/**
+ * POST /admin/users/:id/zones/delete
+ * Business rules:
+ * 1. Admin only (session)
+ * 2. Rules are checked in adminSer.removeCourierZone
+ * 3. Go back to the users list with a message
+ */
+router.post('/users/:id/zones/delete', requireAdminSession, async (req, res) => {
+    try {
+        const courierId = Number(req.params.id);
+        const zoneId = Number(req.body.zoneId);
+        await adminSer.removeCourierZone(courierId, zoneId);
+        res.redirect('/admin/users?role=courier&msg=' + encodeURIComponent('Zone removed'));
+    } catch (err) {
+        res.redirect('/admin/users?role=courier&error=' + encodeURIComponent(err.message));
+    }
 });
 
 module.exports = router;

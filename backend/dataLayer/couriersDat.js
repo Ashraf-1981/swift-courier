@@ -46,4 +46,12 @@ async function getCouriersForZone(zoneId) {
     );
     return rows;
 }
-module.exports = { getCourierById, getZoneIds, countJobsInHand, getCouriersForZone };
+// admin removes one zone from a courier (hard delete, nothing references courier_zones)
+async function removeCourierZone(courierId, zoneId) {
+    const [result] = await pool.query(
+        'DELETE FROM courier_zones WHERE courier_id = ? AND zone_id = ?',
+        [courierId, zoneId]
+    );
+    return result.affectedRows; // 0 = that courier did not have that zone
+}
+module.exports = { getCourierById, getZoneIds, countJobsInHand, getCouriersForZone, removeCourierZone };
