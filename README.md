@@ -73,6 +73,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 - **Booking:** live price, auto vehicle upgrade, extra stops, doorstep / collect-back options, PayNow / card / COD (simulated payment).
 - **Tracking:** My Deliveries with status filter, delivery detail with status history; customer can cancel an order while it is pending and unpaid (soft delete: status Cancelled, kept in history).
 - **Courier:** available jobs, accept (first wins), status buttons, photo or signature proof, failed / returned flow.
+- **Remarks:** customer's doorstep permission, instructions and collect-back note are shown to the courier (before and after accepting), the admin (Orders → Remarks) and the customer (order detail).
 - **Admin (EJS):** warehouse hand-out, orders with filters (status, payment, zone, date range) + mark paid, users list with "Remove zone" for couriers (the hard delete in CRUD). Admins can only log in at `/admin/login`.
 - **AI:** Ask Swift (RAG) for customers; plain-English order search for admin. If Gemini is busy, a lighter backup model answers.
 - **UI:** home page with hero band and vehicle popup (Standard vs 4-Hour), mobile menu, footer; works at phone width.
@@ -119,7 +120,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 
 ## 6. Testing
 ### Automated unit tests (Jest)
-61 tests in `backend/tests/` cover the business rules: courier status flow, admin filters, fees and ERP, booking and cancel rules, vehicle upgrade, auth, delivery proof and the RAG helper. Database and Gemini are mocked, so tests run offline in about 3 seconds.
+64 tests in `backend/tests/` cover the business rules: courier status flow, admin filters, fees and ERP, booking and cancel rules, admin remove zone, vehicle upgrade, auth, delivery proof and the RAG helper. Database and Gemini are mocked, so tests run offline in about 3 seconds.
 
 ```bash
 cd backend
