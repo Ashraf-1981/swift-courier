@@ -12,6 +12,10 @@
             padding: 14px 18px;
             white-space: nowrap;
         }
+
+        .table .row-paid>* {
+            --bs-table-bg: #eef0f2;
+        }
     </style>
 </head>
 
@@ -96,7 +100,7 @@
                                 <th>Created</th>
                             </tr>
                             <% orders.forEach((o)=> { %>
-                                <tr>
+                                <tr class="<%= o.pay_status === 'paid' ? 'row-paid' : '' %>">
                                     <td>
                                         <%= o.tracking_no %>
                                     </td>
@@ -115,14 +119,16 @@
                                     <td>$<%= o.total_fee %>
                                     </td>
                                     <td>
-                                        <%= o.pay_method %> · <%= o.pay_status %>
-                                                <% if (o.pay_status==='unpaid' && o.pay_method !=='cod' && o.status
-                                                    !=='cancelled' ) { %>
-                                                    <form method="POST" action="/admin/orders/<%= o.id %>/paid"
-                                                        class="d-inline ms-3">
-                                                        <button class="btn btn-success btn-sm">Mark paid</button>
-                                                    </form>
-                                                    <% } %>
+                                        <span class="<%= o.pay_status === 'unpaid' ? 'text-danger fw-semibold' : '' %>">
+                                            <%= o.pay_method %> · <%= o.pay_status %>
+                                        </span>
+                                        <% if (o.pay_status==='unpaid' && o.pay_method !=='cod' && o.status
+                                            !=='cancelled' ) { %>
+                                            <form method="POST" action="/admin/orders/<%= o.id %>/paid"
+                                                class="d-inline ms-3">
+                                                <button class="btn btn-success btn-sm">Mark paid</button>
+                                            </form>
+                                            <% } %>
                                     </td>
                                     <td>
                                         <%= new Date(o.created_at).toLocaleDateString() %>
