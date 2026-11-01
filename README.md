@@ -48,6 +48,8 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
    - "unpaid orders to Orchard" fills the filters automatically.
 9. As an admin, I want to mark PayNow and card orders as paid, so that couriers can pick them up.
    - COD orders cannot be marked paid by admin (the courier collects the cash).
+10. As an admin, I want to remove a zone from a courier, so that they stop getting jobs in an area they no longer cover.
+   - Only the courier–zone link is deleted (hard delete); the zone and the courier stay.
 
 ### Wireframes
 | Page | Wireframe |
@@ -71,7 +73,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 - **Booking:** live price, auto vehicle upgrade, extra stops, doorstep / collect-back options, PayNow / card / COD (simulated payment).
 - **Tracking:** My Deliveries with status filter, delivery detail with status history; customer can cancel an order while it is pending and unpaid (soft delete: status Cancelled, kept in history).
 - **Courier:** available jobs, accept (first wins), status buttons, photo or signature proof, failed / returned flow.
-- **Admin (EJS):** warehouse hand-out, orders with filters (status, payment, zone, date range) + mark paid, users list. Admins can only log in at `/admin/login`.
+- **Admin (EJS):** warehouse hand-out, orders with filters (status, payment, zone, date range) + mark paid, users list with "Remove zone" for couriers (the hard delete in CRUD). Admins can only log in at `/admin/login`.
 - **AI:** Ask Swift (RAG) for customers; plain-English order search for admin. If Gemini is busy, a lighter backup model answers.
 - **UI:** home page with hero band and vehicle popup (Standard vs 4-Hour), mobile menu, footer; works at phone width.
 - **Security:** JWT access + refresh tokens with logout blacklist, role checks, rate limiting, bcrypt passwords.
@@ -98,6 +100,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 | Deliver a parcel | Courier completes a job | Log in → My jobs → Accept → Picked up → Out for delivery → Delivered → photo or signature |
 | Hand out warehouse parcel | Admin sends parcel to drop-off courier | /admin → Warehouse → pick courier → Hand out |
 | Find an order | Admin answers a customer call | /admin → Orders → type "unpaid orders to Orchard" → AI search (or use filters) |
+| Remove a courier's zone | Courier stops covering an area | /admin → Users → Courier → pick zone → Remove → OK → zone gone from the list |
 | Ask a question | Customer gets help without calling | Click Ask Swift → type question → answer from our rules and own deliveries |
 | Cancel an order | Customer changes their mind before pickup | My deliveries → open a pending, unpaid order → Cancel order → OK → status Cancelled |
 
@@ -142,6 +145,7 @@ npm run coverage    # tests + coverage report
 | 11 | Gemini down | Wi-Fi off, ask Ask Swift | Friendly error; reason in `logs/app.log` | Pass |
 | 12 | Wrong role | Customer opens `/courier/jobs` | Sent back to Home | Pass |
 | 13 | Cancel order | Open a pending COD order → Cancel order → OK | Status Cancelled, timeline "Cancelled by customer", button gone; paid orders show no Cancel | Pass |
+| 14 | Remove zone | Users → Courier → Ahmad → Orchard → Remove → OK | Green "Zone removed"; Orchard gone from dropdown and from `courier_zones` in MySQL | Pass |
 
 
 ## 7. Deployment
