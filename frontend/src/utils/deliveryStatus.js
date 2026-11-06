@@ -11,7 +11,6 @@ export const STATUS = {
     cancelled: { label: 'Cancelled', color: 'secondary' },
 };
 
-// e.g. "17 Oct, 10:52 am" in Singapore time
 export function formatTime(t) {
     return new Date(t).toLocaleString('en-SG', {
         day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit',

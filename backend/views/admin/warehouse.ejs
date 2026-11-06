@@ -47,6 +47,7 @@
                       </td>
                       <td>
                         <form method="POST" action="/admin/warehouse/<%= p.id %>/assign" class="d-flex gap-2">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                           <select name="courierId" class="form-select form-select-sm" required>
                             <option value="">Pick courier</option>
                             <% p.couriers.forEach((c)=> { %>

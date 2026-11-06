@@ -96,7 +96,7 @@ async function calculateDistance(pickupZoneId, dropoffZoneId) {
     Number(dropoff.center_lat), Number(dropoff.center_lng)
   );
 
-  // round to whole number, if not its like 40.43621987 km
+  // round to 1 decimal, if not its like 40.43621987 km
   return Math.round(km * 10) / 10;
 }
 

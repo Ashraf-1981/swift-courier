@@ -82,8 +82,9 @@
                   <td>
                     <% if (u.role==='courier' ) { %>
                       <% if (u.zone_ids) { const ids=u.zone_ids.split(','); const names=u.zones.split(', '); %>
-                        <form method="POST" action="/admin/users/<%= u.id %>/zones/delete"
-                              onsubmit="return confirm(' Remove this zone from <%=u.name %>?')">
+                      <form method="POST" action="/admin/users/<%= u.id %>/zones/delete"
+                          onsubmit="return confirm(' Remove this zone from <%=u.name %>?')">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <select name="zoneId" class="form-select form-select-sm">
                           <% ids.forEach((id, i)=> { %>
                             <option value="<%= id %>">

@@ -77,7 +77,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 - **Admin (EJS):** warehouse hand-out, orders with filters (status, payment, zone, date range) + mark paid, users list with "Remove zone" for couriers (the hard delete in CRUD). Admins can only log in at `/admin/login`.
 - **AI:** Ask Swift (RAG) for customers; plain-English order search for admin. If Gemini is busy, a lighter backup model answers.
 - **UI:** home page with hero band and vehicle popup (Standard vs 4-Hour), mobile menu, footer; works at phone width.
-- **Security:** JWT access + refresh tokens with logout blacklist, role checks, rate limiting, bcrypt passwords.
+- **Security:** JWT access + refresh tokens with logout blacklist, role checks, rate limiting, bcrypt passwords, CSRF tokens on admin forms.
 
 ### Algorithms
 - **Distance:** Haversine formula between zone centres (no paid maps API).
@@ -90,7 +90,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 - Free hosting sleeps when idle; first load is slow.
 
 ### Pending
-- Stripe test payments, CSRF protection, n8n agent, live GPS tracking(use simulated distance formula)
+- Stripe test payments, n8n agent, live GPS tracking(use simulated distance formula)
 
 
 ## 4. Use Cases
@@ -147,6 +147,7 @@ npm run coverage    # tests + coverage report
 | 12 | Wrong role | Customer opens `/courier/jobs` | Sent back to Home | Pass |
 | 13 | Cancel order | Open a pending COD order → Cancel order → OK | Status Cancelled, timeline "Cancelled by customer", button gone; paid orders show no Cancel | Pass |
 | 14 | Remove zone | Users → Courier → Ahmad → Orchard → Remove → OK | Green "Zone removed"; Orchard gone from dropdown and from `courier_zones` in MySQL | Pass |
+| 15 | CSRF | Change the hidden `_csrf` value on an admin form, then submit | Returns 403 "Invalid form", nothing changes | Pass |
 
 
 ## 7. Deployment
