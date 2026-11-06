@@ -9,6 +9,7 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   port: process.env.DB_PORT,
   // online database (Aiven) needs an encrypted connection; laptop MySQL does not
+  // The live app (Render) uses this to connect to Aiven.
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
 });
 

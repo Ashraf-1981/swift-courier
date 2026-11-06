@@ -15,9 +15,8 @@ function isPaymentReady(job) {
 /**
  * Business rules: which jobs a courier can see
  * - Express courier: pending 4-Hour jobs, island-wide
- * - Normal courier: pickups in his zones (normal types only),
- *   and warehouse hand-overs going to his zones
- */
+ * - Normal courier: pickups in his zones (normal types only)
+ * - Warehouse hand-outs are done by admin, not shown here */
 async function getAvailableJobs(courierId) {
     const courier = await couriersDat.getCourierById(courierId);
     if (!courier) throw new Error('Courier not found');

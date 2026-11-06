@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 /**
  * Business rules: verifyToken
  * 1. Access token must be in the header: Authorization: Bearer <token> (arc)
@@ -49,5 +50,31 @@ function requireAdminSession(req, res, next) {
   }
   next();
 }
+/**
+ * Business rules: makeCsrfToken (EJS admin pages)
+ * 1. Each logged-in admin gets one random token, saved in the session
+ * 2. res.locals lets every EJS page read it as csrfToken
+ */
+function makeCsrfToken(req, res, next) {
+  if (req.session.admin) {
+    if (!req.session.csrfToken) {
+      req.session.csrfToken = crypto.randomBytes(32).toString('hex');
+    }
+    res.locals.csrfToken = req.session.csrfToken;
+  }
+  next();
+}
+/**
+ * Business rules: checkCsrf (EJS admin forms)
+ * 1. Runs after requireAdminSession, on POST routes
+ * 2. The form's token must match the one in the session
+ * 3. Missing or wrong token → 403
+ */
+function checkCsrf(req, res, next) {
+  if (!req.body._csrf || req.body._csrf !== req.session.csrfToken) {
+    return res.status(403).send('Invalid form, please go back and refresh the page');
+  }
+  next();
+}
 
-module.exports = { verifyToken, requireRole, requireAdminSession };
+module.exports = { verifyToken, requireRole, requireAdminSession, makeCsrfToken, checkCsrf };
