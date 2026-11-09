@@ -4,6 +4,7 @@ import { useRef, useEffect } from 'react';
 function SignaturePad({ onSave }) {
     const canvasRef = useRef(null);
     const drawing = useRef(false);
+    const signed = useRef(false); // true if the user has drawn something
 
     // get the mouse/finger position relative to the canvas
     function getPoint(e) {
@@ -30,6 +31,7 @@ function SignaturePad({ onSave }) {
 
     function move(e) {
         if (!drawing.current) return;
+        signed.current = true;
         const ctx = canvasRef.current.getContext('2d');
         const p = getPoint(e);
         ctx.lineWidth = 2;
@@ -42,6 +44,15 @@ function SignaturePad({ onSave }) {
     }
     function clear() {
         fillWhite();
+        signed.current = false;
+    }
+    // Must sign first
+    function save() {
+        if (!signed.current) {
+            window.alert('Please sign first');
+            return;
+        }
+        onSave(canvasRef.current.toDataURL('image/png'));
     }
 
     return (
@@ -61,7 +72,7 @@ function SignaturePad({ onSave }) {
                 Clear
             </button>
             <button type="button" className="btn btn-success btn-sm"
-                onClick={() => onSave(canvasRef.current.toDataURL('image/png'))}>
+                onClick={save}>
                 Save signature
             </button>
         </div>

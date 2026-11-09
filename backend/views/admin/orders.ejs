@@ -95,13 +95,13 @@
                                 <th>Pickup</th>
                                 <th>Drop-off</th>
                                 <th>Status</th>
-                                <th>Fee</th>
+                                <th>Method</th>
                                 <th>Payment</th>
                                 <th>Created</th>
                                 <th>Remarks</th>
                             </tr>
                             <% orders.forEach((o)=> { %>
-                                <tr class="<%= o.pay_status === 'paid' ? 'row-paid' : '' %>">
+                                <tr class="<%= o.status === 'delivered' ? 'row-paid' : '' %>">
 
                                     <td>
                                         <%= o.tracking_no %>
@@ -115,21 +115,23 @@
                                     <td>
                                         <%= o.dropoff_zone %>
                                     </td>
-                                    <td>
+                                    <td
+                                        class="<%= !['cancelled', 'delivered', 'returned'].includes(o.status) ? 'text-danger fw-semibold' : '' %>">
                                         <%= o.status %>
                                     </td>
-                                    <td>$<%= o.total_fee %>
+                                    <td>
+                                        <%= o.pay_method %>
                                     </td>
                                     <td>
-                                        <span class="<%= o.pay_status === 'unpaid' ? 'text-danger fw-semibold' : '' %>">
-                                            <%= o.pay_method %> · <%= o.pay_status %>
+                                        <span
+                                            class="<%= o.pay_status === 'unpaid' && o.status !== 'cancelled' ? 'text-danger fw-semibold' : '' %>">
+                                            <%= o.pay_status %>
                                         </span>
                                         <% if (o.pay_status==='unpaid' && o.pay_method !=='cod' && o.status
                                             !=='cancelled' ) { %>
                                             <form method="POST" action="/admin/orders/<%= o.id %>/paid"
                                                 class="d-inline ms-3">
                                                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-
                                                 <button class="btn btn-success btn-sm">Mark paid</button>
                                             </form>
                                             <% } %>

@@ -16,7 +16,7 @@ async function saveImage(base64) {
     const folder = path.join(__dirname, '..', 'uploads');
 
     await fs.mkdir(folder, { recursive: true }); // create folder if missing
-    await fs.writeFile(path.join(folder, fileName), Buffer.from(match[2], 'base64'));
+    await fs.writeFile(path.join(folder, fileName), Buffer.from(match[2], 'base64')); // Sent to uploads folder
 
     return '/uploads/' + fileName;
 }
