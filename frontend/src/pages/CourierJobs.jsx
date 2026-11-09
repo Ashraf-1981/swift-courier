@@ -27,9 +27,10 @@ function CourierJobs() {
 
     // load (or reload) the available jobs
     async function load() {
-        const mine = await api.get('/couriers/my-jobs');
-        setMyJobs(mine.data);
+
         try {
+            const mine = await api.get('/couriers/my-jobs');
+            setMyJobs(mine.data);
             const res = await api.get('/couriers/jobs');
             setJobs(res.data);
         } catch (err) {
