@@ -10,18 +10,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
-<body class="p-4">
-    <h1>Swift-Courier Admin</h1>
-    <% if (admin) { %>
-        <p>Hi <%= admin.name %> · <a href="/admin/logout">Log out</a></p>
-        <ul class="list-unstyled mt-3">
-            <li class="mb-2"><a href="/admin/orders" class="btn btn-outline-primary">Orders</a></li>
-            <li class="mb-2"><a href="/admin/warehouse" class="btn btn-outline-primary">Warehouse</a></li>
-            <li class="mb-2"><a href="/admin/users" class="btn btn-outline-primary">Users</a></li>
-        </ul>
-        <% } else { %>
-            <p>Not logged in · <a href="/admin/login">Log in</a></p>
-            <% } %>
+<body class="p-4 d-flex justify-content-end align-items-start min-vh-100"
+    style="background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.2)), url('/img/hero.jpg') center / cover no-repeat;">
+    <div class="text-end me-md-5 mt-5">
+        <h1>Swift-Courier Admin</h1>
+        <% if (admin) { %>
+            <p>Hi <%= admin.name %> · <a href="/admin/logout" class="fs-5 fw-bold text-dark">Log out</a></p>
+            <ul class="list-unstyled mt-3">
+                <li class="mb-2"><a href="/admin/orders" class="btn btn-primary">Orders</a></li>
+                <li class="mb-2"><a href="/admin/warehouse" class="btn btn-primary">Warehouse</a></li>
+                <li class="mb-2"><a href="/admin/users" class="btn btn-primary">Users</a></li>
+            </ul>
+            <% } else { %>
+                <p>Not logged in · <a href="/admin/login">Log in</a></p>
+                <% } %>
+    </div>
 </body>
 
 </html>
