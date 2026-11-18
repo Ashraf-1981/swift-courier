@@ -76,8 +76,9 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 - **Remarks:** customer's doorstep permission, instructions and collect-back note are shown to the courier (before and after accepting), the admin (Orders → Remarks) and the customer (order detail).
 - **Admin (EJS):** warehouse hand-out, orders with filters (status, payment, zone, date range) + mark paid, users list with "Remove zone" for couriers (the hard delete in CRUD). Admins can only log in at `/admin/login`.
 - **AI:** Ask Swift (RAG) for customers; plain-English order search for admin. If Gemini is busy, a lighter backup model answers.
-- **UI:** home page with hero band and vehicle popup (Standard vs 4-Hour), mobile menu, footer; works at phone width.
+- **UI:** home page with hero band and vehicle popup (Standard vs 4-Hour), admin home with the same photo as a full-page background, mobile menu, footer; works at phone width.
 - **Security:** JWT access + refresh tokens with logout blacklist, role checks, rate limiting, bcrypt passwords, CSRF tokens on admin forms.
+- **n8n alerts:** n8n Cloud checks the database every minute and posts to Discord: `#failed-deliveries` (tracking no., reason) and `#cod-collected` (tracking no., amount, courier). No backend change; Schedule → MySQL (Aiven, SSL) → Discord webhook.
 
 ### Algorithms
 - **Distance:** Haversine formula between zone centres (no paid maps API).
@@ -90,7 +91,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 - Free hosting sleeps when idle; first load is slow.
 
 ### Pending
-- Stripe test payments, n8n agent, live GPS tracking(use simulated distance formula)
+- Stripe test payments, live GPS tracking(use simulated distance formula)
 
 
 ## 4. Use Cases
@@ -114,7 +115,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 - **Database:** MySQL 8.4 on Aiven (production), MariaDB (local development), mysql2
 - **AI:** Google Gemini API via @google/genai (text, JSON output, embeddings)
 - **Testing:** Jest (unit tests with mocks + coverage)
-- **Tools:** Git, GitHub, VS Code, Excalidraw (wireframes), Render (hosting), Aiven (database)
+- **Tools:** Git, GitHub, VS Code, Excalidraw (wireframes), Render (hosting), Aiven (database),  n8n Cloud (automation), Discord (alerts)
 - **Repo:** https://github.com/Ashraf-1981/swift-courier
 
 
@@ -148,6 +149,8 @@ npm run coverage    # tests + coverage report
 | 13 | Cancel order | Open a pending COD order → Cancel order → OK | Status Cancelled, timeline "Cancelled by customer", button gone; paid orders show no Cancel | Pass |
 | 14 | Remove zone | Users → Courier → Ahmad → Orchard → Remove → OK | Green "Zone removed"; Orchard gone from dropdown and from `courier_zones` in MySQL | Pass |
 | 15 | CSRF | Change the hidden `_csrf` value on an admin form, then submit | Returns 403 "Invalid form", nothing changes | Pass |
+| 16 | n8n failed alert | Courier marks a job Failed with a reason | Within 1 min, message in Discord `#failed-deliveries` | Pass |
+| 17 | n8n COD alert | Courier delivers a COD job and collects cash | Within 1 min, message in Discord `#cod-collected` with amount and courier | Pass |
 
 
 ## 7. Deployment
@@ -155,6 +158,7 @@ npm run coverage    # tests + coverage report
 |------|-------|
 | App (Express + React build + EJS admin) | Render, free web service, Singapore |
 | Database | Aiven, free MySQL 8.4, SSL required |
+| Alerts | n8n Cloud (free trial) → Discord webhooks |
 
 One Express server serves the React build, the `/api` routes and the `/admin` pages, so everything uses one URL. Every push to `main` redeploys automatically.
 
