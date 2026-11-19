@@ -78,7 +78,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 - **AI:** Ask Swift (RAG) for customers; plain-English order search for admin. If Gemini is busy, a lighter backup model answers.
 - **UI:** home page with hero band and vehicle popup (Standard vs 4-Hour), admin home with the same photo as a full-page background, mobile menu, footer; works at phone width.
 - **Security:** JWT access + refresh tokens with logout blacklist, role checks, rate limiting, bcrypt passwords, CSRF tokens on admin forms.
-- **n8n alerts:** n8n Cloud checks the database every minute and posts to Discord: `#failed-deliveries` (tracking no., reason) and `#cod-collected` (tracking no., amount, courier). No backend change; Schedule → MySQL (Aiven, SSL) → Discord webhook.
+- **n8n alerts:** n8n (self-hosted, run locally with `npx n8n`) checks the database every minute and posts to Discord: `#failed-deliveries` (tracking no., reason) and `#cod-collected` (tracking no., amount, courier). No backend change; Schedule → MySQL (Aiven, SSL) → Discord webhook. Moved off n8n Cloud because the free trial's execution limit ran out with 1-minute schedules.
 
 ### Algorithms
 - **Distance:** Haversine formula between zone centres (no paid maps API).
@@ -115,7 +115,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 - **Database:** MySQL 8.4 on Aiven (production), MariaDB (local development), mysql2
 - **AI:** Google Gemini API via @google/genai (text, JSON output, embeddings)
 - **Testing:** Jest (unit tests with mocks + coverage)
-- **Tools:** Git, GitHub, VS Code, Excalidraw (wireframes), Render (hosting), Aiven (database),  n8n Cloud (automation), Discord (alerts)
+- **Tools:** Git, GitHub, VS Code, Excalidraw (wireframes), Render (hosting), Aiven (database),  n8n self-hosted (automation), Discord (alerts)
 - **Repo:** https://github.com/Ashraf-1981/swift-courier
 
 
@@ -158,7 +158,7 @@ npm run coverage    # tests + coverage report
 |------|-------|
 | App (Express + React build + EJS admin) | Render, free web service, Singapore |
 | Database | Aiven, free MySQL 8.4, SSL required |
-| Alerts | n8n Cloud (free trial) → Discord webhooks |
+| Alerts | n8n self-hosted (local, `npx n8n`) → Discord webhooks |
 
 One Express server serves the React build, the `/api` routes and the `/admin` pages, so everything uses one URL. Every push to `main` redeploys automatically.
 
