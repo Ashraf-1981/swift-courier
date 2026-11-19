@@ -103,7 +103,7 @@ function TrackDelivery() {
                     )}
                     <p className="mb-1">Total: ${d.total_fee}</p>
                     {d.payment_method === 'cod' ? (
-                        <p className="mb-0">Payment: Cash on delivery (receiver pays the courier)</p>
+                        <p className="mb-0 text-danger">Payment: Cash on delivery (receiver pays the courier)</p>
                     ) : d.payment_status === 'paid' ? (
                         <p className="mb-0">Payment: <span className="badge bg-success">Paid</span></p>
                     ) : (
