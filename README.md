@@ -72,7 +72,8 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 ### Major features
 - **Booking:** live price, auto vehicle upgrade, extra stops, doorstep / collect-back options, PayNow / card / COD (simulated payment).
 - **Tracking:** My Deliveries with status filter, delivery detail with status history; customer can cancel an order while it is pending and unpaid (soft delete: status Cancelled, kept in history).
-- **Courier:** available jobs, accept (first wins), status buttons, photo or signature proof, failed / returned flow.
+- **Courier:** available jobs, accept (first wins), status buttons, photo or signature proof, failed / returned flow (no Failed button for doorstep jobs: leave it at the door).
+- **Return fee:** when a parcel is returned to the sender, the sender pays half the trip fee (online and COD), shown on the order detail with a Pay button.
 - **Remarks:** customer's doorstep permission, instructions and collect-back note are shown to the courier (before and after accepting), the admin (Orders → Remarks) and the customer (order detail).
 - **Admin (EJS):** warehouse hand-out, orders with filters (status, payment, zone, date range) + mark paid, users list with "Remove zone" for couriers (the hard delete in CRUD). Admins can only log in at `/admin/login`.
 - **AI:** Ask Swift (RAG) for customers; plain-English order search for admin. If Gemini is busy, a lighter backup model answers.
@@ -105,6 +106,7 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 | Remove a courier's zone | Courier stops covering an area | /admin → Users → Courier → pick zone → Remove → OK → zone gone from the list |
 | Ask a question | Customer gets help without calling | Click Ask Swift → type question → answer from our rules and own deliveries |
 | Cancel an order | Customer changes their mind before pickup | My deliveries → open a pending, unpaid order → Cancel order → OK → status Cancelled |
+| Pay a return fee | Sender pays after a parcel comes back | My deliveries → open a Returned order → Return fee: Unpaid → Pay $half → Paid |
 
 
 ## 5. Technologies Used
@@ -151,6 +153,7 @@ npm run coverage    # tests + coverage report
 | 15 | CSRF | Change the hidden `_csrf` value on an admin form, then submit | Returns 403 "Invalid form", nothing changes | Pass |
 | 16 | n8n failed alert | Courier marks a job Failed with a reason | Within 1 min, message in Discord `#failed-deliveries` | Pass |
 | 17 | n8n COD alert | Courier delivers a COD job and collects cash | Within 1 min, message in Discord `#cod-collected` with amount and courier | Pass |
+| 18 | Return fee | 4-Hour online job → Out for delivery → Failed → Returned; customer opens it | Return fee shows half the total; Pay → green Paid | Pass |
 
 
 ## 7. Deployment
