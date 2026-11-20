@@ -98,13 +98,14 @@ function nextStatuses(job, zones, failedCount = 0) {
     }
 
     if (job.status === 'out_for_delivery') {
-        return ['failed'];
+        return job.allow_doorstep ? [] : ['failed']; // doorstep: leave it at the door, can't fail
     }
+
     if (job.status === 'failed') {
         // 4-Hour, or 2nd failed try → back to sender; else → warehouse to redeliver
         return isFourHour || failedCount >= MAX_ATTEMPTS ? ['returned'] : ['at_warehouse'];
-    }
-    return [];
+}
+return [];
 }
 
 
@@ -147,9 +148,9 @@ async function updateJobStatus(courierId, deliveryId, newStatus, reason) {
         throw new Error('Job was updated by someone else');
     }
 
-    // returned to sender: online pays full trip fee again, COD sender pays half
+    // returned to sender: sender pays half the trip fee (online and COD)
     if (newStatus === 'returned') {
-        const fee = job.payment_method === 'cod' ? job.total_fee / 2 : job.total_fee;
+        const fee = job.total_fee / 2;
         await deliveryPaymentsDat.setReturnFee(deliveryId, fee);
     }
 

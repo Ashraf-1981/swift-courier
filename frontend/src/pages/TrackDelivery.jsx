@@ -42,6 +42,18 @@ function TrackDelivery() {
             setPaying(false);
         }
     }
+    async function handlePayReturn() {
+        setPayError('');
+        setPaying(true);
+        try {
+            await api.post(`/deliveries/${id}/pay-return`, { method: 'paynow' }); // PayNow are simulated.”
+            setD({ ...d, return_status: 'paid' }); // show "Paid" without reloading
+        } catch (err) {
+            setPayError(err.response ? err.response.data.error : 'Cannot reach the server');
+        } finally {
+            setPaying(false);
+        }
+    }
 
     // soft delete: status becomes cancelled, the order stays in the history
     async function handleCancel() {
@@ -103,7 +115,9 @@ function TrackDelivery() {
                     )}
                     <p className="mb-1">Total: ${d.total_fee}</p>
                     {d.payment_method === 'cod' ? (
-                        <p className="mb-0 text-danger">Payment: Cash on delivery (receiver pays the courier)</p>
+                        <p className="mb-0 text-danger">
+                            Payment: Cash on delivery {d.status === 'returned' ? '(not collected, parcel returned)' : '(receiver pays the courier)'}
+                        </p>
                     ) : d.payment_status === 'paid' ? (
                         <p className="mb-0">Payment: <span className="badge bg-success">Paid</span></p>
                     ) : (
@@ -116,6 +130,21 @@ function TrackDelivery() {
                                 </button>
                             </div>
                         </>
+                    )}
+                    {d.status === 'returned' && (
+                        <div className="mt-2">
+                            {payError && <div className="alert alert-danger py-2">{payError}</div>}
+                            {d.return_status === 'paid' ? (
+                                <p className="mb-0">Return fee: <span className="badge bg-success">Paid</span></p>
+                            ) : (
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <p className="mb-0">Return fee: <span className="badge bg-danger">Unpaid</span></p>
+                                    <button className="btn btn-primary" onClick={handlePayReturn} disabled={paying}>
+                                        {paying ? 'Paying...' : `Pay $${d.return_fee}`}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </div>
             </div>

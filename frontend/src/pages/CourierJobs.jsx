@@ -107,13 +107,13 @@ function CourierJobs() {
             {myJobs.length === 0 && <p>Nothing in hand.</p>}
             {myJobs.length > 0 && (
                 <div className="table-responsive mb-5">
-                    <table className="table align-middle">
+                    <table className="table align-middle text-center">
                         <thead>
                             <tr className="table-secondary">
-                                <th>Tracking no</th>
+                                <th className="text-start">Tracking no</th>
                                 <th>Status</th>
-                                <th>Pickup address</th>
-                                <th>Drop-off address</th>
+                                <th className="text-start">Pickup address</th>
+                                <th className="text-start">Drop-off address</th>
                                 <th>Receiver</th>
                                 <th>Payment</th>
                                 <th>Notes</th>
@@ -123,14 +123,14 @@ function CourierJobs() {
                         <tbody>
                             {myJobs.map((j) => (
                                 <tr key={j.id}>
-                                    <td>{j.tracking_no}</td>
+                                    <td className="text-start">{j.tracking_no}</td>
                                     <td>{STATUS[j.status].label}</td>
-                                    <td>{j.pickup_address}</td>
-                                    <td>{j.dropoff_address}</td>
+                                    <td className="text-start">{j.pickup_address}</td>
+                                    <td className="text-start">{j.dropoff_address}</td>
                                     <td>{j.dropoff_contact_name} · {j.dropoff_contact_phone}</td>
                                     <td>{j.payment_method === 'cod' ? `Collect $${j.total_fee}` : 'Paid'}</td>
                                     <Remarks j={j} />
-                                    <td><div className="d-flex gap-2">
+                                    <td><div className="d-flex gap-2 justify-content-center">
                                         {j.status === 'out_for_delivery' && (
                                             <button className="btn btn-success btn-sm" onClick={() => setProofJob(j)}>
                                                 Delivered
@@ -185,10 +185,10 @@ function CourierJobs() {
 
             {jobs.length > 0 && (
                 <div className="table-responsive">
-                    <table className="table align-middle">
+                    <table className="table align-middle text-center">
                         <thead>
                             <tr className="table-secondary">
-                                <th>Tracking no</th>
+                                <th className="text-start">Tracking no</th>
                                 <th>Pickup</th>
                                 <th>Drop-off</th>
                                 <th>Vehicle</th>
@@ -200,7 +200,7 @@ function CourierJobs() {
                         <tbody>
                             {jobs.map((j) => (
                                 <tr key={j.id}>
-                                    <td>{j.tracking_no}</td>
+                                    <td className="text-start">{j.tracking_no}</td>
                                     <td>{j.pickup_zone}</td>
                                     <td>{j.dropoff_zone}</td>
                                     <td>{j.vehicle}</td>

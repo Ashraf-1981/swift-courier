@@ -70,7 +70,7 @@ describe('updateJobStatus: failed and returned', () => {
     });
     test('failed on a doorstep job → leave it at the door', async () => {
         deliveriesDat.getDeliveryDetail.mockResolvedValue(job({ allow_doorstep: 1 }));
-        await expect(couriersSer.updateJobStatus(AHMAD, 12, 'failed', 'Nobody home')).rejects.toThrow('Doorstep');
+        await expect(couriersSer.updateJobStatus(AHMAD, 12, 'failed', 'Nobody home')).rejects.toThrow('Cannot change from out_for_delivery to failed');
     });
     test('COD returned after 2 fails → half fee charged', async () => {
         deliveriesDat.getDeliveryDetail.mockResolvedValue(job({ status: 'failed', payment_method: 'cod' }));

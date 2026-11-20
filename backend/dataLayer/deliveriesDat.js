@@ -41,6 +41,7 @@ async function getDeliveryDetail(id) {
             pz.name AS pickup_zone, pz.restricted_note AS pickup_note,
             dz.name AS dropoff_zone, dz.restricted_note AS dropoff_note,
             p.method AS payment_method, p.status AS payment_status,
+            p.return_fee, p.return_status, p.return_method,
             c.name  AS courier_name, c.phone AS courier_phone
      FROM deliveries d
      JOIN delivery_types t ON t.id = d.delivery_type_id
