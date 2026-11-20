@@ -16,7 +16,10 @@ async function addChunk(title, content, embedding) {
 // all chunks, embedding comes back as an array (mysql2 parses JSON columns)
 async function getAllChunks() {
   const [rows] = await pool.query('SELECT id, title, content, embedding FROM knowledge_chunks');
-  return rows;
+  return rows.map((r) => ({
+    ...r,
+    embedding: typeof r.embedding === 'string' ? JSON.parse(r.embedding) : r.embedding,
+  }));
 }
 
 module.exports = { deleteAll, addChunk, getAllChunks };
