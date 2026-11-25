@@ -106,7 +106,7 @@ function TrackDelivery() {
                 <div className="card-body">
                     <p className="mb-1">Vehicle: {d.vehicle}</p>
                     <p className="mb-1">Pickup time: {formatTime(d.scheduled_pickup_at)}</p>
-                    {(d.allow_doorstep || d.instructions || d.collect_back) && (
+                    {!!(d.allow_doorstep || d.instructions || d.collect_back) && (
                         <p className="mb-1">Remarks: {[
                             d.allow_doorstep && 'Doorstep OK',
                             d.instructions,
@@ -135,7 +135,7 @@ function TrackDelivery() {
                         <div className="mt-2">
                             {payError && <div className="alert alert-danger py-2">{payError}</div>}
                             {d.return_status === 'paid' ? (
-                                <p className="mb-0">Return fee: <span className="badge bg-success">Paid</span></p>
+                                <p className="mb-0">Return fee: ${d.return_fee} <span className="badge bg-success">Paid</span></p>
                             ) : (
                                 <div className="d-flex justify-content-between align-items-center">
                                     <p className="mb-0">Return fee: <span className="badge bg-danger">Unpaid</span></p>
