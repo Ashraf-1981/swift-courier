@@ -90,6 +90,9 @@ Small businesses and individuals in Singapore need fast local deliveries, from d
 - Payment is simulated (no Stripe).
 - Proof photos are not kept after a Render restart (no permanent disk on the free plan).
 - Free hosting sleeps when idle; first load is slow.
+- Ask Swift sees only the customer's 10 latest deliveries.
+- n8n alerts run only while the laptop is on (self-hosted locally).
+- Free Aiven database may power off when idle; power it on in the Aiven console.
 
 ### Pending
 - Stripe test payments, live GPS tracking(use simulated distance formula)
